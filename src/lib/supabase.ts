@@ -42,6 +42,20 @@ function rowToProject(row: ProjectRow): NotionProject {
 // ─── Public helpers ───────────────────────────────────────────────────────────
 
 /**
+ * Fetches ALL projects from Supabase (used on the homepage).
+ * This is the primary data source in production so we never need a Notion proxy.
+ */
+export async function getAllProjectsFromCache(): Promise<NotionProject[]> {
+  const { data, error } = await supabase
+    .from('projects')
+    .select('*')
+    .order('updated_at', { ascending: false });
+
+  if (error) throw new Error(`Supabase fetch failed: ${error.message}`);
+  return (data ?? []).map((row) => rowToProject(row as ProjectRow));
+}
+
+/**
  * Returns the cached project if it exists and is still fresh (< 1 h old).
  * Returns null if missing or stale so the caller can re-fetch from Notion.
  */

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Play, Pause } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { WorkItem, NotionProject } from '@/lib/types';
-import { getProjects } from '@/lib/notion';
+import { getAllProjectsFromCache } from '@/lib/supabase';
 import { Button } from './ui/button';
 
 // ─── Per-card cover images (index-based until Notion has a Cover property) ────
@@ -358,7 +358,7 @@ export const ContentArea: React.FC = () => {
     setLoading(true);
     setError(null);
 
-    getProjects()
+    getAllProjectsFromCache()
       .then((projects) => {
         if (!cancelled) {
           setWorkItems(projects.map(projectToWorkItem));
