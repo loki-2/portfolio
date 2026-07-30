@@ -29,6 +29,14 @@ const BG_GRADIENTS: Record<number, string> = {
   2: 'radial-gradient(ellipse at center, #1685C5 0%, #105C89 100%)',
 };
 
+// ─── Fixed display order of Notion page IDs ───────────────────────────────────
+// This ensures cover images/gradients stay consistent regardless of Supabase order.
+const PROJECT_ORDER = [
+  '3804078ba2908056aeacdb709e4bffe7', // Redesigning a Prediction Exchange for Scale
+  '3804078ba29080cfab17ff8f582002ba', // Building a Sports Prediction Exchange 0→1
+  '3734078ba290801484dadc9ff0a8c51b', // Designing for Human-AI Collaboration
+];
+
 function projectToWorkItem(
   p: Omit<NotionProject, 'blocks' | 'updatedAt'>,
   index: number
@@ -361,7 +369,14 @@ export const ContentArea: React.FC = () => {
     getAllProjectsFromCache()
       .then((projects) => {
         if (!cancelled) {
-          setWorkItems(projects.map(projectToWorkItem));
+          // Sort by the fixed display order so cover images/gradients always match
+          const sorted = [...projects].sort((a, b) => {
+            const ai = PROJECT_ORDER.indexOf(a.notionPageId);
+            const bi = PROJECT_ORDER.indexOf(b.notionPageId);
+            // Unknown IDs go to the end
+            return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+          });
+          setWorkItems(sorted.map(projectToWorkItem));
         }
       })
       .catch((err: Error) => {
