@@ -1,7 +1,16 @@
 [build]
   command = "npm run build"
   publish = "dist"
+  functions = "netlify/functions"
 
+# Proxy /api/notion/* requests to Netlify serverless function
+[[redirects]]
+  from = "/api/notion/*"
+  to = "/.netlify/functions/notion"
+  status = 200
+  force = true
+
+# Single Page App routing fallback
 [[redirects]]
   from = "/*"
   to = "/index.html"
