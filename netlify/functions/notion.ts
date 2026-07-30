@@ -1,8 +1,6 @@
 import type { Handler } from '@netlify/functions';
 
 export const handler: Handler = async (event) => {
-  // Extract path following /api/notion (e.g. /databases/xxx/query or /pages/xxx)
-  const path = event.path.replace(/^\/api\/notion/, '');
   const NOTION_TOKEN = process.env.NOTION_TOKEN;
 
   if (!NOTION_TOKEN) {
@@ -13,8 +11,20 @@ export const handler: Handler = async (event) => {
     };
   }
 
-  // Build target Notion API URL
-  const targetUrl = `https://api.notion.com/v1${path}${event.rawQuery ? '?' + event.rawQuery : ''}`;
+  // Extract the original request path from rawUrl (event.path is rewritten by the redirect)
+  // rawUrl looks like: https://yoursite.netlify.app/api/notion/databases/xxx/query
+  let notionPath = '';
+  try {
+    const url = new URL(event.rawUrl);
+    // Strip the /api/notion prefix to get the Notion API sub-path
+    notionPath = url.pathname.replace(/^\/api\/notion/, '');
+  } catch {
+    // Fallback: strip from event.path if rawUrl parsing fails
+    notionPath = event.path.replace(/^\/.netlify\/functions\/notion/, '');
+  }
+
+  const queryString = event.rawQuery ? `?${event.rawQuery}` : '';
+  const targetUrl = `https://api.notion.com/v1${notionPath}${queryString}`;
 
   try {
     const res = await fetch(targetUrl, {
