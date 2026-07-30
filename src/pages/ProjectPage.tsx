@@ -233,7 +233,7 @@ export function ProjectPage() {
 
   const forceRefresh = searchParams.get('refresh') === 'true';
 
-  // ── Load project data (stale-while-revalidate) ────────────────────────────
+  // ── Load project data (Supabase-first, Notion as fallback) ──────────────────
   useEffect(() => {
     if (!pageId) return;
 
@@ -243,41 +243,40 @@ export function ProjectPage() {
 
     (async () => {
       try {
-        if (forceRefresh) {
-          const data = await getProjectWithBlocks(pageId);
-          if (!cancelled) {
-            setProject(data);
-            setSections(groupBlocksIntoSections(data.blocks));
-            setLoading(false);
-            setSearchParams({}, { replace: true });
+        // 1. Try Supabase cache first (fast, no proxy needed)
+        const cached = await getCachedProject(pageId);
+        if (cached && !cancelled) {
+          setProject(cached);
+          setSections(groupBlocksIntoSections(cached.blocks));
+          setLoading(false);
+
+          // If forceRefresh, also re-fetch from Notion in the background to update cache
+          if (forceRefresh) {
+            getProjectWithBlocks(pageId)
+              .then((fresh) => {
+                if (!cancelled) {
+                  setProject(fresh);
+                  setSections(groupBlocksIntoSections(fresh.blocks));
+                }
+                upsertProject(fresh).catch(() => {});
+              })
+              .catch(() => {}) // silently ignore Notion errors if cache was shown
+              .finally(() => {
+                if (!cancelled) setSearchParams({}, { replace: true });
+              });
           }
-          upsertProject(data).catch(() => { });
           return;
         }
 
-        let notionDone = false;
-        let cacheShown = false;
-
-        const notionPromise = getProjectWithBlocks(pageId).then(async (data) => {
-          notionDone = true;
-          if (!cancelled) {
-            setProject(data);
-            setSections(groupBlocksIntoSections(data.blocks));
-            setLoading(false);
-          }
-          upsertProject(data).catch(() => { });
-        });
-
-        getCachedProject(pageId).then((cached) => {
-          if (cached && !notionDone && !cacheShown && !cancelled) {
-            cacheShown = true;
-            setProject(cached);
-            setSections(groupBlocksIntoSections(cached.blocks));
-            setLoading(false);
-          }
-        }).catch(() => { });
-
-        await notionPromise;
+        // 2. Cache miss — fetch fresh from Notion (requires proxy)
+        const data = await getProjectWithBlocks(pageId);
+        if (!cancelled) {
+          setProject(data);
+          setSections(groupBlocksIntoSections(data.blocks));
+          setLoading(false);
+          setSearchParams({}, { replace: true });
+        }
+        upsertProject(data).catch(() => {});
 
       } catch (err) {
         if (!cancelled) {

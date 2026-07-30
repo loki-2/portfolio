@@ -7,8 +7,6 @@ const supabase = createClient(
   import.meta.env.VITE_SUPABASE_ANON_KEY as string
 );
 
-// Cache is considered fresh for 1 hour
-const CACHE_TTL_MS = 60 * 60 * 1000;
 
 // ─── Row shape (matches the Supabase table) ──────────────────────────────────
 interface ProjectRow {
@@ -68,9 +66,6 @@ export async function getCachedProject(notionPageId: string): Promise<NotionProj
       .single();
 
     if (error || !data) return null;
-
-    const age = Date.now() - new Date(data.updated_at).getTime();
-    if (age > CACHE_TTL_MS) return null;   // stale
 
     return rowToProject(data as ProjectRow);
   } catch {
