@@ -228,7 +228,12 @@ const MinimalMusicPlayer: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    fetch('https://itunes.apple.com/lookup?id=1407165118')
+    // Use Netlify function proxy in production to avoid CORS; direct API on localhost
+    const itunesUrl = window.location.hostname === 'localhost'
+      ? 'https://itunes.apple.com/lookup?id=1407165118'
+      : '/.netlify/functions/itunes?id=1407165118';
+
+    fetch(itunesUrl)
       .then((res) => res.json())
       .then((data) => {
         if (data.results && data.results[0]) {
