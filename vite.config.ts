@@ -25,12 +25,101 @@ export default defineConfig(({ mode }) => {
             const SUPABASE_URL   = env.VITE_SUPABASE_URL;
             const SUPABASE_KEY   = env.VITE_SUPABASE_ANON_KEY;
             const NOTION_VERSION = '2022-06-28';
+            const STORAGE_BUCKET = 'notion-images';
 
             const notionHeaders = {
               Authorization: `Bearer ${NOTION_TOKEN}`,
               'Notion-Version': NOTION_VERSION,
               'Content-Type': 'application/json',
             };
+
+            // ── Upload image to Supabase Storage and return permanent public URL ──
+            async function uploadImageToSupabase(
+              imageUrl: string,
+              storagePath: string
+            ): Promise<string | null> {
+              try {
+                // Download from Notion S3
+                const imgRes = await fetch(imageUrl);
+                if (!imgRes.ok) return null;
+
+                const contentType = imgRes.headers.get('content-type') ?? 'image/jpeg';
+                const ext = contentType.includes('png') ? 'png'
+                  : contentType.includes('gif') ? 'gif'
+                  : contentType.includes('webp') ? 'webp'
+                  : 'jpg';
+                const fullPath = `${storagePath}.${ext}`;
+                const imgBuffer = await imgRes.arrayBuffer();
+
+                // Upload to Supabase Storage (upsert)
+                const uploadRes = await fetch(
+                  `${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${fullPath}`,
+                  {
+                    method: 'POST',
+                    headers: {
+                      apikey: SUPABASE_KEY,
+                      Authorization: `Bearer ${SUPABASE_KEY}`,
+                      'Content-Type': contentType,
+                      'x-upsert': 'true',
+                    },
+                    body: imgBuffer,
+                  }
+                );
+
+                if (!uploadRes.ok) {
+                  const errText = await uploadRes.text();
+                  console.warn(`[sync] Storage upload failed for ${fullPath}: ${errText}`);
+                  return null;
+                }
+
+                // Return the permanent public URL
+                return `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${fullPath}`;
+              } catch (e) {
+                console.warn('[sync] Image upload error:', e);
+                return null;
+              }
+            }
+
+            // ── Walk blocks and replace Notion image URLs with permanent ones ──
+            async function processBlocks(
+              blocks: unknown[],
+              projectId: string
+            ): Promise<unknown[]> {
+              const processed: unknown[] = [];
+              let imgIndex = 0;
+
+              for (const block of blocks) {
+                const b = block as Record<string, unknown>;
+
+                if (b.type === 'image') {
+                  const image = b.image as Record<string, unknown> | undefined;
+                  const fileUrl = (image?.file as Record<string, unknown> | undefined)?.url as string | undefined;
+
+                  if (fileUrl) {
+                    const storagePath = `${projectId}/img_${imgIndex++}`;
+                    const permanentUrl = await uploadImageToSupabase(fileUrl, storagePath);
+
+                    if (permanentUrl) {
+                      // Replace the signed S3 URL with the permanent storage URL
+                      processed.push({
+                        ...b,
+                        image: {
+                          ...(image ?? {}),
+                          file: { url: permanentUrl },
+                          // Mark as external so NotionRenderer uses it directly
+                          _supabase: true,
+                        },
+                      });
+                      continue;
+                    }
+                  }
+                }
+
+                processed.push(block);
+              }
+
+              return processed;
+            }
 
             try {
               // 1. Fetch all pages in the DB
@@ -75,6 +164,10 @@ export default defineConfig(({ mode }) => {
                     cursor = bData.has_more ? bData.next_cursor : null;
                   } while (cursor);
 
+                  // Upload images to Supabase Storage & replace URLs in blocks
+                  console.log(`[sync] Processing images for "${title}"...`);
+                  const processedBlocks = await processBlocks(blocks, notionPageId);
+
                   // Upsert to Supabase
                   const upsertRes = await fetch(`${SUPABASE_URL}/rest/v1/projects`, {
                     method: 'POST',
@@ -93,7 +186,7 @@ export default defineConfig(({ mode }) => {
                       duration:  richText(props.Duration?.rich_text),
                       methods:   richText(props.Methods?.rich_text),
                       tags:      (props.Tags?.multi_select ?? []).map(t => t.name),
-                      blocks,
+                      blocks: processedBlocks,
                       updated_at: new Date().toISOString(),
                     }),
                   });
