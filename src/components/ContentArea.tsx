@@ -435,12 +435,17 @@ export const ContentArea: React.FC = () => {
                 <h4 className="text-base font-medium text-white">Abhishek Edla</h4>
                 <p className="text-[10px] text-white/40 tracking-wide">PRODUCT DESIGNER | INDIA</p>
               </div>
-              <div className="flex items-center justify-between text-xs font-medium text-white pt-2 border-t border-white/10 cursor-pointer group">
+              <a
+                href="https://drive.google.com/drive/folders/1mEdpp-eo9aFGIEU8GDJ-iVe6l2pwTr_z?usp=drive_link"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between text-xs font-medium text-white pt-2 border-t border-white/10 cursor-pointer group no-underline"
+              >
                 View resume
                 <div className="bg-white text-black p-1 rounded-full group-hover:scale-110 transition-transform">
                   <ArrowRight size={12} strokeWidth={3} />
                 </div>
-              </div>
+              </a>
             </div>
           </div>
 
