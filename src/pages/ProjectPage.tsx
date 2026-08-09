@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
-import { getCachedProject, upsertProject } from '@/lib/supabase';
-import { getProjectWithBlocks, getProjects } from '@/lib/notion';
+import { getCachedProject, upsertProject, getAllProjectsFromCache } from '@/lib/supabase';
+import { getProjectWithBlocks } from '@/lib/notion';
 import { SectionContent, groupBlocksIntoSections } from '@/components/NotionRenderer';
 import type { NotionProject, ProjectSection } from '@/lib/types';
 import { TwitterTickerSection } from '@/components/TwitterTicker';
@@ -212,12 +212,23 @@ export function ProjectPage() {
   // Check if current page is the first project & fetch all projects for prev/next
   useEffect(() => {
     if (!pageId) return;
-    getProjects()
+    getAllProjectsFromCache()
       .then((all) => {
-        setAllProjects(all);
-        if (all.length > 0) {
+        // Sort by same fixed order used on homepage
+        const PROJECT_ORDER = [
+          '3804078ba2908056aeacdb709e4bffe7',
+          '3804078ba29080cfab17ff8f582002ba',
+          '3734078ba290801484dadc9ff0a8c51b',
+        ];
+        const sorted = [...all].sort((a, b) => {
+          const ai = PROJECT_ORDER.indexOf(a.notionPageId);
+          const bi = PROJECT_ORDER.indexOf(b.notionPageId);
+          return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+        });
+        setAllProjects(sorted);
+        if (sorted.length > 0) {
           const currentId = pageId.replace(/-/g, '');
-          const firstId = all[0].notionPageId.replace(/-/g, '');
+          const firstId = sorted[0].notionPageId.replace(/-/g, '');
           setIsFirstProject(currentId === firstId);
         }
       })

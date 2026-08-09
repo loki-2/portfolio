@@ -143,7 +143,12 @@ function BlockRenderer({ block }: { block: NotionBlock }) {
     }
 
     case 'image': {
-      const src = b.image?.file?.url ?? b.image?.external?.url ?? '';
+      const rawSrc = b.image?.file?.url ?? b.image?.external?.url ?? '';
+      // Proxy signed Notion/S3 URLs through our serverless function so they never expire
+      const isNotionFile = b.image?.file?.url;
+      const src = isNotionFile && rawSrc
+        ? `/.netlify/functions/notion-image?url=${encodeURIComponent(rawSrc)}`
+        : rawSrc;
       const caption = b.image?.caption ?? [];
       return (
         <figure className="my-6 -mx-4 lg:-mx-6">
