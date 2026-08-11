@@ -180,7 +180,11 @@ function BlockRenderer({ block }: { block: NotionBlock }) {
       if (!rawUrl) return null;
 
       // Helper to check if URL is a direct video file
-      const isDirectVideo = /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(rawUrl) || rawUrl.includes('prod-files-secure.s3');
+      const isDirectVideo =
+        /\.(mp4|webm|ogg|mov|m4v)(\?.*)?$/i.test(rawUrl) ||
+        rawUrl.includes('prod-files-secure.s3') ||
+        rawUrl.includes('supabase.co/storage') ||
+        b.type === 'video';
 
       // Helper to turn common links (Twitter, YouTube, Loom, Vimeo) into iframe embeds
       const getEmbedUrl = (url: string) => {

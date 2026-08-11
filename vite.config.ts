@@ -33,23 +33,44 @@ export default defineConfig(({ mode }) => {
               'Content-Type': 'application/json',
             };
 
-            // ── Upload image to Supabase Storage and return permanent public URL ──
-            async function uploadImageToSupabase(
-              imageUrl: string,
+            // ── Upload image or video to Supabase Storage and return permanent public URL ──
+            async function uploadMediaToSupabase(
+              mediaUrl: string,
               storagePath: string
             ): Promise<string | null> {
               try {
                 // Download from Notion S3
-                const imgRes = await fetch(imageUrl);
-                if (!imgRes.ok) return null;
+                const res = await fetch(mediaUrl);
+                if (!res.ok) {
+                  console.warn(`[sync] Failed to fetch media from Notion: ${res.status}`);
+                  return null;
+                }
 
-                const contentType = imgRes.headers.get('content-type') ?? 'image/jpeg';
-                const ext = contentType.includes('png') ? 'png'
-                  : contentType.includes('gif') ? 'gif'
-                  : contentType.includes('webp') ? 'webp'
-                  : 'jpg';
+                const contentType = res.headers.get('content-type') ?? '';
+                let ext = '';
+                if (contentType.includes('png')) ext = 'png';
+                else if (contentType.includes('gif')) ext = 'gif';
+                else if (contentType.includes('webp')) ext = 'webp';
+                else if (contentType.includes('jpeg') || contentType.includes('jpg')) ext = 'jpg';
+                else if (contentType.includes('svg')) ext = 'svg';
+                else if (contentType.includes('mp4')) ext = 'mp4';
+                else if (contentType.includes('webm')) ext = 'webm';
+                else if (contentType.includes('quicktime') || contentType.includes('mov')) ext = 'mov';
+                else if (contentType.includes('ogg')) ext = 'ogg';
+                else if (contentType.includes('m4v')) ext = 'm4v';
+                else {
+                  try {
+                    const urlPath = new URL(mediaUrl).pathname;
+                    const match = urlPath.match(/\.([a-zA-Z0-9]+)$/);
+                    if (match) ext = match[1].toLowerCase();
+                  } catch { }
+                  if (!ext) {
+                    ext = contentType.startsWith('video/') ? 'mp4' : 'jpg';
+                  }
+                }
+
                 const fullPath = `${storagePath}.${ext}`;
-                const imgBuffer = await imgRes.arrayBuffer();
+                const mediaBuffer = await res.arrayBuffer();
 
                 // Upload to Supabase Storage (upsert)
                 const uploadRes = await fetch(
@@ -59,10 +80,10 @@ export default defineConfig(({ mode }) => {
                     headers: {
                       apikey: SUPABASE_KEY,
                       Authorization: `Bearer ${SUPABASE_KEY}`,
-                      'Content-Type': contentType,
+                      'Content-Type': contentType || 'application/octet-stream',
                       'x-upsert': 'true',
                     },
-                    body: imgBuffer,
+                    body: mediaBuffer,
                   }
                 );
 
@@ -75,18 +96,19 @@ export default defineConfig(({ mode }) => {
                 // Return the permanent public URL
                 return `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${fullPath}`;
               } catch (e) {
-                console.warn('[sync] Image upload error:', e);
+                console.warn('[sync] Media upload error:', e);
                 return null;
               }
             }
 
-            // ── Walk blocks and replace Notion image URLs with permanent ones ──
+            // ── Walk blocks and replace Notion image & video URLs with permanent ones ──
             async function processBlocks(
               blocks: unknown[],
               projectId: string
             ): Promise<unknown[]> {
               const processed: unknown[] = [];
               let imgIndex = 0;
+              let vidIndex = 0;
 
               for (const block of blocks) {
                 const b = block as Record<string, unknown>;
@@ -94,10 +116,12 @@ export default defineConfig(({ mode }) => {
                 if (b.type === 'image') {
                   const image = b.image as Record<string, unknown> | undefined;
                   const fileUrl = (image?.file as Record<string, unknown> | undefined)?.url as string | undefined;
+                  const extUrl = (image?.external as Record<string, unknown> | undefined)?.url as string | undefined;
+                  const targetUrl = fileUrl || (extUrl?.includes('prod-files-secure.s3') ? extUrl : undefined);
 
-                  if (fileUrl) {
+                  if (targetUrl) {
                     const storagePath = `${projectId}/img_${imgIndex++}`;
-                    const permanentUrl = await uploadImageToSupabase(fileUrl, storagePath);
+                    const permanentUrl = await uploadMediaToSupabase(targetUrl, storagePath);
 
                     if (permanentUrl) {
                       // Replace the signed S3 URL with the permanent storage URL
@@ -106,7 +130,29 @@ export default defineConfig(({ mode }) => {
                         image: {
                           ...(image ?? {}),
                           file: { url: permanentUrl },
-                          // Mark as external so NotionRenderer uses it directly
+                          _supabase: true,
+                        },
+                      });
+                      continue;
+                    }
+                  }
+                } else if (b.type === 'video') {
+                  const video = b.video as Record<string, unknown> | undefined;
+                  const fileUrl = (video?.file as Record<string, unknown> | undefined)?.url as string | undefined;
+                  const extUrl = (video?.external as Record<string, unknown> | undefined)?.url as string | undefined;
+                  const targetUrl = fileUrl || (extUrl?.includes('prod-files-secure.s3') ? extUrl : undefined);
+
+                  if (targetUrl) {
+                    const storagePath = `${projectId}/vid_${vidIndex++}`;
+                    const permanentUrl = await uploadMediaToSupabase(targetUrl, storagePath);
+
+                    if (permanentUrl) {
+                      // Replace the signed S3 URL with the permanent storage URL
+                      processed.push({
+                        ...b,
+                        video: {
+                          ...(video ?? {}),
+                          file: { url: permanentUrl },
                           _supabase: true,
                         },
                       });
