@@ -14,7 +14,7 @@ const navItems = [
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeSection, scrollToSection }) => {
   return (
-    <aside className="w-full lg:w-[400px] shrink-0 flex flex-col lg:justify-between lg:h-screen lg:sticky top-0 py-6 lg:py-10 px-5 lg:px-10 border-b lg:border-b-0 lg:border-r border-white/[0.06] gap-6 lg:gap-0 bg-background z-10">
+    <aside className="w-full lg:w-[400px] shrink-0 flex flex-col lg:justify-between lg:h-screen lg:sticky top-0 py-6 lg:py-10 px-5 lg:px-10 gap-6 lg:gap-0 bg-background z-10">
 
       {/* TOP ROW MOBILE / TOP SECTION DESKTOP */}
       <div className="flex flex-col gap-6 lg:gap-6">
