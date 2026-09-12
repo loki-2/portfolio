@@ -1,60 +1,79 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Sidebar } from '@/components/Sidebar';
+import { Sidebar, type SidebarHandle } from '@/components/Sidebar';
 import { ContentArea } from '@/components/ContentArea';
 
-// Target positions inside the sidebar (desktop).
-// Sidebar: lg:px-10 lg:py-10 = 40px padding. Avatar: w-12 h-12 = 48px.
-const SIDEBAR_AVATAR_CENTER = { x: 40 + 24, y: 40 + 24 };
-const SIDEBAR_HEADING_Y     = 40 + 48 + 24 + 12 + 24; // ~148px from top
-
 export function HomePage() {
-  const [phase, setPhase] = useState<'intro' | 'exiting' | 'done'>('intro');
+  const [phase, setPhase] = useState<'intro' | 'moving' | 'settled' | 'done'>('intro');
   const [activeSection, setActiveSection] = useState<string>('work');
   const contentRef = useRef<HTMLDivElement>(null);
+  const sidebarRef = useRef<SidebarHandle>(null);
 
   const introAvatarRef  = useRef<HTMLDivElement>(null);
   const introHeadingRef = useRef<HTMLHeadingElement>(null);
 
-  // Plain numbers for exit transforms — avoids TS index-signature conflicts with TargetAndTransition
   const avatarExitRef  = useRef({ x: 0, y: 0, scale: 1 });
   const headingExitRef = useRef({ x: 0, y: 0, scale: 1 });
-  const [exitReady, setExitReady] = useState(false);
 
   useEffect(() => {
+    // Stage 1: Intro plays centered (0 -> 2100ms)
+    // Stage 2: Measure live target coordinates & move elements to Sidebar target positions (at 2100ms)
     const t1 = setTimeout(() => {
-      const isDesktop = window.innerWidth >= 1024;
+      if (introAvatarRef.current && introHeadingRef.current && sidebarRef.current) {
+        const sidebarAvatarEl = sidebarRef.current.getAvatarEl();
+        const sidebarTitleEl  = sidebarRef.current.getTitleEl();
 
-      if (introAvatarRef.current) {
-        const r = introAvatarRef.current.getBoundingClientRect();
-        const fromX = r.left + r.width  / 2;
-        const fromY = r.top  + r.height / 2;
-        avatarExitRef.current = {
-          x:     isDesktop ? SIDEBAR_AVATAR_CENTER.x - fromX : 0,
-          y:     isDesktop ? SIDEBAR_AVATAR_CENTER.y - fromY : 0,
-          scale: isDesktop ? 48 / r.width : 0.5,
-        };
+        if (sidebarAvatarEl) {
+          const rIntro  = introAvatarRef.current.getBoundingClientRect();
+          const rTarget = sidebarAvatarEl.getBoundingClientRect();
+
+          const fromX = rIntro.left + rIntro.width / 2;
+          const fromY = rIntro.top  + rIntro.height / 2;
+          const toX   = rTarget.left + rTarget.width / 2;
+          const toY   = rTarget.top  + rTarget.height / 2;
+
+          avatarExitRef.current = {
+            x: toX - fromX,
+            y: toY - fromY,
+            scale: rTarget.width / rIntro.width,
+          };
+        }
+
+        if (sidebarTitleEl) {
+          const rIntro  = introHeadingRef.current.getBoundingClientRect();
+          const rTarget = sidebarTitleEl.getBoundingClientRect();
+
+          const fromX = rIntro.left + rIntro.width / 2;
+          const fromY = rIntro.top  + rIntro.height / 2;
+          const toX   = rTarget.left + rTarget.width / 2;
+          const toY   = rTarget.top  + rTarget.height / 2;
+
+          headingExitRef.current = {
+            x: toX - fromX,
+            y: toY - fromY,
+            scale: rTarget.height / rIntro.height,
+          };
+        }
       }
 
-      if (introHeadingRef.current) {
-        const r = introHeadingRef.current.getBoundingClientRect();
-        const fromX = r.left + r.width  / 2;
-        const fromY = r.top  + r.height / 2;
-        const toX = isDesktop ? 40 + 160 : fromX;
-        const toY = isDesktop ? SIDEBAR_HEADING_Y : fromY;
-        headingExitRef.current = {
-          x:     toX - fromX,
-          y:     toY - fromY,
-          scale: isDesktop ? 0.52 : 0.6,
-        };
-      }
+      setPhase('moving');
+    }, 2100);
 
-      setExitReady(true);
-      setPhase('exiting');
-    }, 2200);
+    // Stage 3: Elements arrive and settle! Intro overlay fades out, secondary sidebar & projects fade in (at 2750ms)
+    const t2 = setTimeout(() => {
+      setPhase('settled');
+    }, 2750);
 
-    const t2 = setTimeout(() => setPhase('done'), 2800);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+    // Stage 4: Overlay removed from DOM (at 3350ms)
+    const t3 = setTimeout(() => {
+      setPhase('done');
+    }, 3350);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
   }, []);
 
   // Scroll section tracking
@@ -84,31 +103,38 @@ export function HomePage() {
     }
   };
 
+  const isMovingOrSettled = phase === 'moving' || phase === 'settled';
+  const showSecondary     = phase === 'settled' || phase === 'done';
+  const isSettled         = phase === 'settled' || phase === 'done';
+
   return (
     <div className="bg-background text-foreground antialiased">
 
       {/* ── INTRO OVERLAY ──────────────────────────────────────────────────────
-          The container holds the background + centers the elements.
-          Only the BACKGROUND fades — the elements animate individually. */}
+          Solid dark overlay. ONLY fades out AFTER elements move and settle. */}
       {phase !== 'done' && (
         <motion.div
-          animate={{ opacity: phase === 'exiting' ? 0 : 1 }}
-          transition={{ duration: 0.45, delay: phase === 'exiting' ? 0.3 : 0, ease: 'easeOut' }}
+          animate={{ opacity: phase === 'settled' ? 0 : 1 }}
+          transition={{ duration: 0.45, ease: 'easeOut' }}
           className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center gap-7 pointer-events-none"
         >
-          {/* Avatar: ball-physics arc, then flies to sidebar position */}
+          {/* Avatar */}
           <motion.div
             ref={introAvatarRef}
             initial={{ opacity: 0, y: 90, scale: 0.28 }}
             animate={
-              exitReady
-                ? { x: avatarExitRef.current.x, y: avatarExitRef.current.y,
-                    scale: avatarExitRef.current.scale, opacity: 0 }
+              isMovingOrSettled
+                ? {
+                    x: avatarExitRef.current.x,
+                    y: avatarExitRef.current.y,
+                    scale: avatarExitRef.current.scale,
+                    opacity: 1, // Full opacity while moving & settling!
+                  }
                 : { opacity: [0, 1, 1], y: [90, -80, 0], scale: [0.28, 0.72, 1] }
             }
             transition={
-              exitReady
-                ? { duration: 0.52, ease: 'easeInOut' }
+              isMovingOrSettled
+                ? { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
                 : { duration: 0.88, times: [0, 0.38, 1], ease: ['easeOut', 'easeIn'] }
             }
             className="w-[84px] h-[84px] rounded-full overflow-hidden ring-2 ring-white/25 shadow-[0_8px_50px_rgba(255,255,255,0.10)]"
@@ -116,21 +142,29 @@ export function HomePage() {
             <img src="/avatar.png" alt="Abhishek" className="w-full h-full object-cover" />
           </motion.div>
 
-          {/* Heading: letter-spacing tightens on entry, then flies to sidebar */}
+          {/* Heading */}
           <motion.h1
             ref={introHeadingRef}
             initial={{ opacity: 0, letterSpacing: '0.45em', y: 8 }}
             animate={
-              exitReady
-                ? { x: headingExitRef.current.x, y: headingExitRef.current.y,
-                    scale: headingExitRef.current.scale, opacity: 0 }
+              isMovingOrSettled
+                ? {
+                    x: headingExitRef.current.x,
+                    y: headingExitRef.current.y,
+                    scale: headingExitRef.current.scale,
+                    opacity: 1, // Full opacity while moving & settling!
+                  }
                 : { opacity: 1, letterSpacing: '-0.01em', y: 0 }
             }
             transition={
-              exitReady
-                ? { duration: 0.52, ease: 'easeInOut', delay: 0.04 }
-                : { delay: 0.98, duration: 0.65, ease: 'easeOut',
-                    opacity: { delay: 0.98, duration: 0.22, ease: 'easeOut' } }
+              isMovingOrSettled
+                ? { duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.02 }
+                : {
+                    delay: 0.98,
+                    duration: 0.65,
+                    ease: 'easeOut',
+                    opacity: { delay: 0.98, duration: 0.22, ease: 'easeOut' },
+                  }
             }
             className="text-3xl lg:text-[2.75rem] font-semibold text-white text-center leading-tight"
           >
@@ -140,20 +174,29 @@ export function HomePage() {
       )}
 
       {/* ── MAIN LAYOUT ────────────────────────────────────────────────────────
-          Pre-renders during intro so images load. Fades in as overlay exits. */}
-      <motion.div
+          Sidebar avatar & title settle in place, then secondary elements & right side projects fade in. */}
+      <div
         ref={contentRef}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: phase !== 'intro' ? 1 : 0 }}
-        transition={{ duration: 0.6, ease: 'easeOut' }}
         className="flex flex-col lg:flex-row h-screen overflow-y-auto overflow-x-hidden scroll-smooth"
       >
-        <Sidebar activeSection={activeSection} scrollToSection={scrollToSection} />
-        <div className="flex-1">
+        <Sidebar
+          ref={sidebarRef}
+          activeSection={activeSection}
+          scrollToSection={scrollToSection}
+          showSecondary={showSecondary}
+          isSettled={isSettled}
+        />
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: showSecondary ? 1 : 0, y: showSecondary ? 0 : 16 }}
+          transition={{ duration: 0.6, ease: 'easeOut', delay: 0.15 }}
+          className="flex-1"
+        >
           <ContentArea />
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
 
     </div>
   );
 }
+
