@@ -16,11 +16,11 @@ export function HomePage() {
   const headingExitRef = useRef({ x: 0, y: 0, scale: 1 });
 
   useEffect(() => {
-    // Stage 1: Center intro sequence (0 -> 2800ms)
-    // 0ms -> 1200ms: Ball arc (thrown up to y: -110, drops & lands on text at 840ms with squash impact, bounces)
-    // 820ms -> 1260ms: Text emerges under landing ball with wide letter spacing (0.45em), holds wide
-    // 1260ms -> 1920ms: Letter-spacing tightens from 0.45em to -0.025em
-    // 1920ms -> 2800ms: Pause at center screen so user reads settled text
+    // Stage 1: Center intro sequence (0 -> 3300ms)
+    // 0ms -> 1200ms: Ball arc (thrown up, drops & lands, bounces & fully settles at 1200ms)
+    // 1350ms -> 1800ms: Heading emerges AFTER avatar settles (delay: 1.35s)
+    // 1800ms -> 2450ms: Letter-spacing tightens to -0.025em
+    // 2450ms -> 3300ms: Pause so user reads settled text
     const t1 = setTimeout(() => {
       if (introAvatarRef.current && introHeadingRef.current && sidebarRef.current) {
         const sidebarAvatarEl = sidebarRef.current.getAvatarEl();
@@ -60,17 +60,17 @@ export function HomePage() {
       }
 
       setPhase('moving');
-    }, 2800);
+    }, 3300);
 
-    // Stage 2: Arrive & settle at sidebar target (2800 + 650 = 3450ms)
+    // Stage 2: Arrive & settle at sidebar target (3300 + 650 = 3950ms)
     const t2 = setTimeout(() => {
       setPhase('settled');
-    }, 3450);
+    }, 3950);
 
-    // Stage 3: Clean up overlay DOM (3450 + 600 = 4050ms)
+    // Stage 3: Clean up overlay DOM (3950 + 600 = 4550ms)
     const t3 = setTimeout(() => {
       setPhase('done');
-    }, 4050);
+    }, 4550);
 
     return () => {
       clearTimeout(t1);
@@ -176,7 +176,7 @@ export function HomePage() {
               isMovingOrSettled
                 ? { duration: 0.65, ease: [0.16, 1, 0.3, 1] }
                 : {
-                  delay: 0.82,
+                  delay: 1.35,
                   duration: 1.15,
                   times: [0, 0.35, 0.82, 1],
                   ease: ['easeOut', [0.34, 1.56, 0.64, 1], 'easeOut'] as any,
