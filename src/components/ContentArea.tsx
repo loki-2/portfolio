@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { ArrowRight, Play, Pause } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { WorkItem, NotionProject } from '@/lib/types';
@@ -52,22 +53,7 @@ function projectToWorkItem(
   };
 }
 
-// ─── Skeleton card ────────────────────────────────────────────────────────────
-function WorkCardSkeleton() {
-  return (
-    <div className="relative w-full rounded-xl overflow-hidden flex flex-col lg:flex-row items-stretch bg-[#131313] border border-white/[0.08] animate-pulse h-auto lg:h-[480px]">
-      <div className="flex flex-col justify-end p-6 sm:p-7 lg:p-9 flex-1 gap-4">
-        <div className="h-7 w-3/4 bg-white/10 rounded-lg" />
-        <div className="h-4 w-1/2 bg-white/5 rounded" />
-        <div className="flex gap-2 pt-2">
-          <div className="h-6 w-16 bg-white/5 rounded-md" />
-          <div className="h-6 w-20 bg-white/5 rounded-md" />
-        </div>
-      </div>
-      <div className="w-full lg:w-[45%] h-52 lg:h-auto bg-white/[0.03]" />
-    </div>
-  );
-}
+// (skeleton removed — projects appear directly once loaded)
 
 const WorkCard: React.FC<WorkItem> = ({ title, tags, bgClass, bgGradient, coverImage, notionPageId }) => {
   const navigate = useNavigate();
@@ -363,12 +349,10 @@ const MinimalMusicPlayer: React.FC = () => {
 // ─── Content Area ─────────────────────────────────────────────────────────────
 export const ContentArea: React.FC = () => {
   const [workItems, setWorkItems] = useState<WorkItem[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
     setError(null);
 
     getAllProjectsFromCache()
@@ -386,39 +370,34 @@ export const ContentArea: React.FC = () => {
       })
       .catch((err: Error) => {
         if (!cancelled) setError(err.message);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
       });
 
     return () => { cancelled = true; };
   }, []);
 
   return (
-    <main className="flex-1 pb-4 pt-4 lg:pt-8 px-4 lg:px-6 flex flex-col gap-5 lg:gap-6 relative min-h-full">
+    <motion.main
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: 'easeOut', delay: 1.0 }}
+      className="flex-1 pb-4 pt-4 lg:pt-8 px-4 lg:px-6 flex flex-col gap-5 lg:gap-6 relative min-h-full"
+    >
       {/* Subtle background grid lines (rows and columns) */}
       <div className="absolute inset-0 bg-grid-pattern pointer-events-none z-0" />
 
       {/* WORK SECTION */}
       <section id="work" className="scroll-mt-10 flex flex-col gap-5 lg:gap-6 relative z-10">
-        {loading && (
-          <>
-            <WorkCardSkeleton />
-            <WorkCardSkeleton />
-            <WorkCardSkeleton />
-          </>
-        )}
         {error && (
           <div className="flex items-center justify-center py-16">
             <p className="text-sm text-white/40">Couldn't load projects: {error}</p>
           </div>
         )}
-        {!loading && !error && workItems.map((item) => (
+        {!error && workItems.map((item) => (
           <WorkCard key={item.notionPageId} {...item} />
         ))}
 
         {/* ── Static projects (2-col on desktop, 1-col on mobile) ── */}
-        {!loading && !error && (
+        {!error && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 lg:gap-6">
             {STATIC_PROJECTS.map((item) => (
               <StaticWorkCard key={item.href} {...item} />
@@ -641,6 +620,6 @@ export const ContentArea: React.FC = () => {
           </Button>
         </div>
       </section>
-    </main>
+    </motion.main>
   );
 };
