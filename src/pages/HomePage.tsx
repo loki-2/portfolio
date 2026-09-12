@@ -120,29 +120,31 @@ export function HomePage() {
           transition={{ duration: 0.6, ease: 'easeOut' }}
           className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center gap-7 pointer-events-none"
         >
-          {/* Avatar: physics ball (small ball going up -> grows coming down -> lands smoothly with zero bounce) */}
+          {/* Avatar: Aperture / Soft Lens Unfold (shoots up as small dot -> unfolds & focuses as it lands) */}
           <motion.div
             ref={introAvatarRef}
-            initial={{ opacity: 0, y: 140, scale: 0.25 }}
+            initial={{ opacity: 0, y: 140, scale: 0.25, filter: 'blur(8px)' }}
             animate={
               isMovingOrSettled
                 ? {
                   x: avatarExitRef.current.x,
                   y: avatarExitRef.current.y,
                   scale: avatarExitRef.current.scale,
+                  filter: 'blur(0px)',
                   opacity: 1,
                 }
                 : {
                   opacity: [0, 1, 1],
                   y: [140, -110, 0],
                   scale: [0.25, 0.25, 1],
+                  filter: ['blur(8px)', 'blur(6px)', 'blur(0px)'],
                 }
             }
             transition={
               isMovingOrSettled
                 ? { duration: 0.9, ease: [0.16, 1, 0.3, 1] }
                 : {
-                  duration: 1.0,
+                  duration: 1.05,
                   times: [0, 0.45, 1],
                   ease: ['easeOut', [0.16, 1, 0.3, 1]],
                 }
