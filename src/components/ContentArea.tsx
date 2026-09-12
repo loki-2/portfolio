@@ -395,10 +395,12 @@ export const ContentArea: React.FC = () => {
   }, []);
 
   return (
-    <main className="flex-1 pb-4 pt-4 lg:pt-8 px-4 lg:px-6 flex flex-col gap-5 lg:gap-6">
+    <main className="flex-1 pb-4 pt-4 lg:pt-8 px-4 lg:px-6 flex flex-col gap-5 lg:gap-6 relative min-h-full">
+      {/* Subtle background grid lines (rows and columns) */}
+      <div className="absolute inset-0 bg-grid-pattern pointer-events-none z-0" />
 
       {/* WORK SECTION */}
-      <section id="work" className="scroll-mt-10 flex flex-col gap-5 lg:gap-6">
+      <section id="work" className="scroll-mt-10 flex flex-col gap-5 lg:gap-6 relative z-10">
         {loading && (
           <>
             <WorkCardSkeleton />
@@ -428,7 +430,7 @@ export const ContentArea: React.FC = () => {
 
 
       {/* EXPERIENCE SECTION */}
-      <section id="experience" className="scroll-mt-10">
+      <section id="experience" className="scroll-mt-10 relative z-10">
         <div className="bg-[#131313] rounded-xl p-6 lg:p-12 flex flex-col lg:flex-row gap-8 lg:gap-16">
 
           {/* Left: Title & Resume */}
@@ -497,7 +499,7 @@ export const ContentArea: React.FC = () => {
       </section>
 
       {/* HOW I USE AI SECTION */}
-      <section id="ai" className="scroll-mt-10">
+      <section id="ai" className="scroll-mt-10 relative z-10">
         <div className="bg-[#131313] rounded-xl p-6 lg:p-12 flex flex-col lg:flex-row gap-8 lg:gap-16">
 
           {/* Left: Title */}
@@ -536,7 +538,7 @@ export const ContentArea: React.FC = () => {
                   href="https://getvibecoderz.com/profile/9079433c-7a5c-4dc0-a688-f8eb12712bd7"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-medium text-white/70 hover:text-white underline underline-offset-4 transition-colors w-fit pt-1 group"
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-white/90 hover:text-white underline underline-offset-4 transition-colors w-fit pt-1 group"
                 >
                   View my projects
                   <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
@@ -573,7 +575,7 @@ export const ContentArea: React.FC = () => {
       </section>
 
       {/* ABOUT SECTION */}
-      <section id="about" className="scroll-mt-10">
+      <section id="about" className="scroll-mt-10 relative z-10">
         <div className="bg-[#131313] rounded-xl p-6 lg:p-12 flex flex-col gap-8 lg:gap-10">
           <h2 className="text-3xl lg:text-4xl font-semibold text-white tracking-tight">About</h2>
 
@@ -619,7 +621,7 @@ export const ContentArea: React.FC = () => {
       </section>
 
       {/* CTA SECTION */}
-      <section className="mb-6">
+      <section className="mb-6 relative z-10">
         <div className="w-full rounded-xl p-6 lg:p-14 flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-8 relative overflow-hidden bg-gradient-to-br from-[#0F3F2D] to-[#0A261B]">
           <h2 className="text-3xl lg:text-4xl font-semibold text-white leading-tight tracking-tight max-w-xl z-10">
             Need an designer who takes ownership? I'd love to be your guy.

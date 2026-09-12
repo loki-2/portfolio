@@ -76,6 +76,14 @@
   }
 }
 
+/* Background grid pattern of light lines (rows and columns) */
+.bg-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
 /* Custom minimal scrollbar */
 ::-webkit-scrollbar {
   width: 4px;
