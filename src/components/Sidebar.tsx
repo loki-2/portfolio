@@ -1,9 +1,11 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 
 interface SidebarProps {
   activeSection: string;
   scrollToSection: (sectionId: string) => void;
+  introPhase?: 'center' | 'morphing' | 'done';
 }
 
 const navItems = [
@@ -12,7 +14,9 @@ const navItems = [
   { id: 'experience', label: 'Experience' },
 ];
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeSection, scrollToSection }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeSection, scrollToSection, introPhase = 'done' }) => {
+  const isMorphingOrDone = introPhase !== 'center';
+
   return (
     <aside className="w-full lg:w-[400px] shrink-0 flex flex-col lg:justify-between lg:h-screen lg:sticky top-0 py-6 lg:py-10 px-5 lg:px-10 gap-6 lg:gap-0 bg-background z-10">
 
@@ -21,9 +25,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeSection, scrollToSection
 
         {/* Mobile Header: Avatar + Nav */}
         <div className="flex justify-between items-start lg:hidden">
-          <div className="w-12 h-12 rounded-full overflow-hidden bg-white/10 ring-1 ring-white/20">
+          {/* Avatar (Mobile) */}
+          <motion.div
+            layoutId="avatar-morph"
+            transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+            className={`w-12 h-12 rounded-full overflow-hidden bg-white/10 ring-1 ring-white/20 shrink-0 ${!isMorphingOrDone ? 'opacity-0' : 'opacity-100'}`}
+          >
             <img src="/avatar.png" alt="Abhishek" className="w-full h-full object-cover" />
-          </div>
+          </motion.div>
+
           <nav className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-full px-5 py-2.5">
             {navItems.map((item) => (
               <button
@@ -38,53 +48,76 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeSection, scrollToSection
         </div>
 
         {/* Desktop Avatar */}
-        <div className="hidden lg:block w-12 h-12 rounded-full overflow-hidden bg-white/10 ring-1 ring-white/20">
-          <img src="/avatar.png" alt="Abhishek" className="w-full h-full object-cover" />
+        <div className="hidden lg:block">
+          <motion.div
+            layoutId="avatar-morph"
+            transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+            className={`w-12 h-12 rounded-full overflow-hidden bg-white/10 ring-1 ring-white/20 shrink-0 ${!isMorphingOrDone ? 'opacity-0' : 'opacity-100'}`}
+          >
+            <img src="/avatar.png" alt="Abhishek" className="w-full h-full object-cover" />
+          </motion.div>
         </div>
 
         {/* Heading */}
-        <div className="mt-2 lg:mt-3">
+        <motion.div
+          layoutId="heading-morph"
+          transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+          className={`mt-2 lg:mt-3 ${!isMorphingOrDone ? 'opacity-0' : 'opacity-100'}`}
+        >
           <h1 className="text-3xl lg:text-4xl font-semibold leading-[1.15] tracking-tight text-white">
             Hey! I'm Abhishek.<br className="hidden lg:block" />
             <span className="text-white/48 font-medium lg:ml-0 ml-2">
               Product Designer &amp; Builder.
             </span>
           </h1>
-        </div>
+        </motion.div>
 
-        {/* Description */}
-        <p className="text-base lg:text-base font-semibold text-white/48 leading-relaxed max-w-sm">
-          3+ years of experience in designing products at fast-paced, high-ownership startups—from MVP to Growth.
-        </p>
+        {/* Secondary Info (Description + CTA + Available Badge) */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: isMorphingOrDone ? 1 : 0, y: isMorphingOrDone ? 0 : 15 }}
+          transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-col gap-6"
+        >
+          {/* Description */}
+          <p className="text-base lg:text-base font-semibold text-white/48 leading-relaxed max-w-sm">
+            3+ years of experience in designing products at fast-paced, high-ownership startups—from MVP to Growth.
+          </p>
 
-        {/* CTA Button */}
-        <div className="flex flex-col gap-4 lg:gap-3 pt-4">
-          <Button
-            asChild
-            className="w-fit rounded-full bg-white text-black text-sm font-bold px-5 py-2 h-auto hover:bg-white/85 transition-colors"
-          >
-            <a
-              href="https://www.linkedin.com/in/abhishek-edla-334126214/"
-              target="_blank"
-              rel="noopener noreferrer"
+          {/* CTA Button */}
+          <div className="flex flex-col gap-4 lg:gap-3 pt-2">
+            <Button
+              asChild
+              className="w-fit rounded-full bg-white text-black text-sm font-bold px-5 py-2 h-auto hover:bg-white/85 transition-colors"
             >
-              Let's Chat
-            </a>
-          </Button>
+              <a
+                href="https://www.linkedin.com/in/abhishek-edla-334126214/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Let's Chat
+              </a>
+            </Button>
 
-          {/* Available for work */}
-          <div className="flex items-center gap-2 mt-4">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-            </span>
-            <span className="text-sm lg:text-sm text-emerald-400/80">Exploring high-agency roles</span>
+            {/* Available for work */}
+            <div className="flex items-center gap-2 mt-4">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+              </span>
+              <span className="text-sm lg:text-sm text-emerald-400/80">Exploring high-agency roles</span>
+            </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* BOTTOM — Footer row */}
-      <div className="flex flex-col gap-6 lg:gap-5">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: isMorphingOrDone ? 1 : 0, y: isMorphingOrDone ? 0 : 10 }}
+        transition={{ duration: 0.7, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        className="flex flex-col gap-6 lg:gap-5"
+      >
         <div className="hidden lg:flex items-center justify-between text-[11px] text-white/30">
           {/* LinkedIn icon */}
           <a
@@ -107,7 +140,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeSection, scrollToSection
             abhishek.edla1203@gmail.com
           </a>
         </div>
-      </div>
+      </motion.div>
     </aside>
   );
 };
+

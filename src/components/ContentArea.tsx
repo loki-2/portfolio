@@ -345,10 +345,17 @@ const MinimalMusicPlayer: React.FC = () => {
   );
 };
 
+import { motion } from 'framer-motion';
+
 // ─── Content Area ─────────────────────────────────────────────────────────────
-export const ContentArea: React.FC = () => {
+interface ContentAreaProps {
+  introPhase?: 'center' | 'morphing' | 'done';
+}
+
+export const ContentArea: React.FC<ContentAreaProps> = ({ introPhase = 'done' }) => {
   const [workItems, setWorkItems] = useState<WorkItem[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const isMorphingOrDone = introPhase !== 'center';
 
   useEffect(() => {
     let cancelled = false;
@@ -376,8 +383,16 @@ export const ContentArea: React.FC = () => {
 
   return (
     <main className="flex-1 pb-4 pt-4 lg:pt-8 px-4 lg:px-6 flex flex-col gap-5 lg:gap-6 relative min-h-full">
-      {/* Subtle background grid lines (rows and columns) */}
+      {/* Subtle background grid lines (rows and columns) — ALWAYS visible */}
       <div className="absolute inset-0 bg-grid-pattern pointer-events-none z-0" />
+
+      {/* Main sections wrapper — animates in once morph starts */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: isMorphingOrDone ? 1 : 0, y: isMorphingOrDone ? 0 : 20 }}
+        transition={{ duration: 0.8, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+        className="flex flex-col gap-5 lg:gap-6 relative z-10 w-full"
+      >
 
       {/* WORK SECTION */}
       <section id="work" className="scroll-mt-10 flex flex-col gap-5 lg:gap-6 relative z-10">
@@ -614,6 +629,7 @@ export const ContentArea: React.FC = () => {
           </Button>
         </div>
       </section>
+      </motion.div>
     </main>
   );
 };
