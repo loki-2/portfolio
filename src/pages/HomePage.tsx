@@ -152,38 +152,54 @@ export function HomePage() {
             <img src="/avatar.png" alt="Abhishek" className="w-full h-full object-cover" />
           </motion.div>
 
-          {/* Heading: emerges wide right as ball lands -> holds wide -> tightens -> pauses -> moves */}
+          {/* Heading: kinetic character ripple upon ball impact with elastic spring overshoot */}
           <motion.h1
             ref={introHeadingRef}
-            initial={{ opacity: 0, letterSpacing: '0.45em', y: 16 }}
             animate={
               isMovingOrSettled
                 ? {
                   x: headingExitRef.current.x,
                   y: headingExitRef.current.y,
                   scale: headingExitRef.current.scale,
-                  letterSpacing: '-0.025em',
                   opacity: 1,
                 }
-                : {
-                  opacity: [0, 1, 1],
-                  y: [16, 0, 0],
-                  letterSpacing: ['0.45em', '0.45em', '-0.025em'],
-                }
+                : { opacity: 1, y: 0 }
             }
             transition={
               isMovingOrSettled
                 ? { duration: 0.65, ease: [0.16, 1, 0.3, 1] }
-                : {
-                  delay: 0.82,
-                  duration: 1.1,
-                  times: [0, 0.4, 1],
-                  ease: ['easeOut', 'easeInOut'],
-                }
+                : { duration: 0.4 }
             }
             className="text-3xl lg:text-4xl font-semibold text-white tracking-tight leading-[1.15] text-center inline-block"
           >
-            Hey! I'm Abhishek.
+            {Array.from("Hey! I'm Abhishek.").map((char, index) => (
+              <motion.span
+                key={index}
+                initial={{ opacity: 0, y: 16, filter: 'blur(4px)' }}
+                animate={
+                  isMovingOrSettled
+                    ? { opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }
+                    : {
+                      opacity: [0, 1, 1],
+                      y: [16, -3, 0],
+                      filter: ['blur(4px)', 'blur(0px)', 'blur(0px)'],
+                      scale: [1.2, 0.96, 1],
+                    }
+                }
+                transition={
+                  isMovingOrSettled
+                    ? { duration: 0.65, ease: [0.16, 1, 0.3, 1] }
+                    : {
+                      delay: 0.82 + index * 0.022,
+                      duration: 0.5,
+                      ease: [0.34, 1.56, 0.64, 1],
+                    }
+                }
+                className="inline-block whitespace-pre"
+              >
+                {char}
+              </motion.span>
+            ))}
           </motion.h1>
         </motion.div>
       )}
