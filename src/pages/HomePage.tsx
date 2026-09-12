@@ -9,28 +9,31 @@ export function HomePage() {
   const contentRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<SidebarHandle>(null);
 
-  const introAvatarRef  = useRef<HTMLDivElement>(null);
+  const introAvatarRef = useRef<HTMLDivElement>(null);
   const introHeadingRef = useRef<HTMLHeadingElement>(null);
 
-  const avatarExitRef  = useRef({ x: 0, y: 0, scale: 1 });
+  const avatarExitRef = useRef({ x: 0, y: 0, scale: 1 });
   const headingExitRef = useRef({ x: 0, y: 0, scale: 1 });
 
   useEffect(() => {
-    // Stage 1: Intro plays centered (0 -> 2100ms)
-    // Stage 2: Measure live target coordinates & move elements to Sidebar target positions (at 2100ms)
+    // Stage 1: Center intro sequence (0 -> 2800ms)
+    // 0ms -> 1200ms: Ball arc (thrown up to y: -110, drops & lands on text at 840ms with squash impact, bounces)
+    // 820ms -> 1260ms: Text emerges under landing ball with wide letter spacing (0.45em), holds wide
+    // 1260ms -> 1920ms: Letter-spacing tightens from 0.45em to -0.025em
+    // 1920ms -> 2800ms: Pause at center screen so user reads settled text
     const t1 = setTimeout(() => {
       if (introAvatarRef.current && introHeadingRef.current && sidebarRef.current) {
         const sidebarAvatarEl = sidebarRef.current.getAvatarEl();
-        const sidebarTitleEl  = sidebarRef.current.getTitleEl();
+        const sidebarTitleEl = sidebarRef.current.getTitleEl();
 
         if (sidebarAvatarEl) {
-          const rIntro  = introAvatarRef.current.getBoundingClientRect();
+          const rIntro = introAvatarRef.current.getBoundingClientRect();
           const rTarget = sidebarAvatarEl.getBoundingClientRect();
 
           const fromX = rIntro.left + rIntro.width / 2;
-          const fromY = rIntro.top  + rIntro.height / 2;
-          const toX   = rTarget.left + rTarget.width / 2;
-          const toY   = rTarget.top  + rTarget.height / 2;
+          const fromY = rIntro.top + rIntro.height / 2;
+          const toX = rTarget.left + rTarget.width / 2;
+          const toY = rTarget.top + rTarget.height / 2;
 
           avatarExitRef.current = {
             x: toX - fromX,
@@ -40,34 +43,34 @@ export function HomePage() {
         }
 
         if (sidebarTitleEl) {
-          const rIntro  = introHeadingRef.current.getBoundingClientRect();
+          const rIntro = introHeadingRef.current.getBoundingClientRect();
           const rTarget = sidebarTitleEl.getBoundingClientRect();
 
           const fromX = rIntro.left + rIntro.width / 2;
-          const fromY = rIntro.top  + rIntro.height / 2;
-          const toX   = rTarget.left + rTarget.width / 2;
-          const toY   = rTarget.top  + rTarget.height / 2;
+          const fromY = rIntro.top + rIntro.height / 2;
+          const toX = rTarget.left + rTarget.width / 2;
+          const toY = rTarget.top + rTarget.height / 2;
 
           headingExitRef.current = {
             x: toX - fromX,
             y: toY - fromY,
-            scale: rTarget.height / rIntro.height,
+            scale: rTarget.width / rIntro.width,
           };
         }
       }
 
       setPhase('moving');
-    }, 2100);
+    }, 2800);
 
-    // Stage 3: Elements arrive and settle! Intro overlay fades out, secondary sidebar & projects fade in (at 2750ms)
+    // Stage 2: Arrive & settle at sidebar target (2800 + 650 = 3450ms)
     const t2 = setTimeout(() => {
       setPhase('settled');
-    }, 2750);
+    }, 3450);
 
-    // Stage 4: Overlay removed from DOM (at 3350ms)
+    // Stage 3: Clean up overlay DOM (3450 + 600 = 4050ms)
     const t3 = setTimeout(() => {
       setPhase('done');
-    }, 3350);
+    }, 4050);
 
     return () => {
       clearTimeout(t1);
@@ -104,69 +107,79 @@ export function HomePage() {
   };
 
   const isMovingOrSettled = phase === 'moving' || phase === 'settled';
-  const showSecondary     = phase === 'settled' || phase === 'done';
-  const isSettled         = phase === 'settled' || phase === 'done';
+  const showSecondary = phase === 'settled' || phase === 'done';
+  const isSettled = phase === 'settled' || phase === 'done';
 
   return (
     <div className="bg-background text-foreground antialiased">
 
-      {/* ── INTRO OVERLAY ──────────────────────────────────────────────────────
-          Solid dark overlay. ONLY fades out AFTER elements move and settle. */}
+      {/* ── INTRO OVERLAY ────────────────────────────────────────────────────── */}
       {phase !== 'done' && (
         <motion.div
           animate={{ opacity: phase === 'settled' ? 0 : 1 }}
           transition={{ duration: 0.45, ease: 'easeOut' }}
           className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center gap-7 pointer-events-none"
         >
-          {/* Avatar */}
+          {/* Avatar: physics ball (thrown up -> drops & impacts text -> bounce -> settle) */}
           <motion.div
             ref={introAvatarRef}
-            initial={{ opacity: 0, y: 90, scale: 0.28 }}
+            initial={{ opacity: 0, y: 140, scale: 0.25 }}
             animate={
               isMovingOrSettled
                 ? {
-                    x: avatarExitRef.current.x,
-                    y: avatarExitRef.current.y,
-                    scale: avatarExitRef.current.scale,
-                    opacity: 1, // Full opacity while moving & settling!
-                  }
-                : { opacity: [0, 1, 1], y: [90, -80, 0], scale: [0.28, 0.72, 1] }
+                  x: avatarExitRef.current.x,
+                  y: avatarExitRef.current.y,
+                  scale: avatarExitRef.current.scale,
+                  opacity: 1,
+                }
+                : {
+                  opacity: [0, 1, 1, 1, 1],
+                  y: [140, -110, 0, -14, 0],
+                  scale: [0.25, 0.9, 1.08, 0.96, 1],
+                }
             }
             transition={
               isMovingOrSettled
-                ? { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
-                : { duration: 0.88, times: [0, 0.38, 1], ease: ['easeOut', 'easeIn'] }
+                ? { duration: 0.65, ease: [0.16, 1, 0.3, 1] }
+                : {
+                  duration: 1.2,
+                  times: [0, 0.38, 0.7, 0.88, 1],
+                  ease: ['easeOut', 'easeIn', 'easeOut', 'easeIn'],
+                }
             }
             className="w-[84px] h-[84px] rounded-full overflow-hidden ring-2 ring-white/25 shadow-[0_8px_50px_rgba(255,255,255,0.10)]"
           >
             <img src="/avatar.png" alt="Abhishek" className="w-full h-full object-cover" />
           </motion.div>
 
-          {/* Heading */}
+          {/* Heading: emerges wide right as ball lands -> holds wide -> tightens -> pauses -> moves */}
           <motion.h1
             ref={introHeadingRef}
-            initial={{ opacity: 0, letterSpacing: '0.25em', y: 8 }}
+            initial={{ opacity: 0, letterSpacing: '0.45em', y: 16 }}
             animate={
               isMovingOrSettled
                 ? {
-                    x: headingExitRef.current.x,
-                    y: headingExitRef.current.y,
-                    scale: headingExitRef.current.scale,
-                    letterSpacing: '-0.025em',
-                    opacity: 1,
-                  }
-                : { opacity: 1, letterSpacing: '-0.025em', y: 0 }
+                  x: headingExitRef.current.x,
+                  y: headingExitRef.current.y,
+                  scale: headingExitRef.current.scale,
+                  letterSpacing: '-0.025em',
+                  opacity: 1,
+                }
+                : {
+                  opacity: [0, 1, 1],
+                  y: [16, 0, 0],
+                  letterSpacing: ['0.45em', '0.45em', '-0.025em'],
+                }
             }
             transition={
               isMovingOrSettled
-                ? { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
+                ? { duration: 0.65, ease: [0.16, 1, 0.3, 1] }
                 : {
-                    delay: 0.98,
-                    duration: 0.65,
-                    ease: 'easeOut',
-                    letterSpacing: { delay: 0.98, duration: 0.65, ease: 'easeOut' },
-                    opacity: { delay: 0.98, duration: 0.22, ease: 'easeOut' },
-                  }
+                  delay: 0.82,
+                  duration: 1.1,
+                  times: [0, 0.4, 1],
+                  ease: ['easeOut', 'easeInOut'],
+                }
             }
             className="text-3xl lg:text-4xl font-semibold text-white tracking-tight leading-[1.15] text-center inline-block"
           >
@@ -175,8 +188,7 @@ export function HomePage() {
         </motion.div>
       )}
 
-      {/* ── MAIN LAYOUT ────────────────────────────────────────────────────────
-          Sidebar avatar & title settle in place, then secondary elements & right side projects fade in. */}
+      {/* ── MAIN LAYOUT ──────────────────────────────────────────────────────── */}
       <div
         ref={contentRef}
         className="flex flex-col lg:flex-row h-screen overflow-y-auto overflow-x-hidden scroll-smooth"
