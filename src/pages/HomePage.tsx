@@ -70,7 +70,7 @@ export function HomePage() {
     // Stage 3: Clean up overlay DOM (3950 + 600 = 4550ms)
     const t3 = setTimeout(() => {
       setPhase('done');
-    }, 4550);
+    }, 4400);
 
     return () => {
       clearTimeout(t1);
@@ -117,10 +117,10 @@ export function HomePage() {
       {phase !== 'done' && (
         <motion.div
           animate={{ opacity: phase === 'settled' ? 0 : 1 }}
-          transition={{ duration: 0.45, ease: 'easeOut' }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
           className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center gap-7 pointer-events-none"
         >
-          {/* Avatar: physics ball (small ball going up -> grows coming down -> impacts text -> bounce -> settle) */}
+          {/* Avatar: physics ball (small ball going up -> grows coming down -> lands smoothly with zero bounce) */}
           <motion.div
             ref={introAvatarRef}
             initial={{ opacity: 0, y: 140, scale: 0.25 }}
@@ -133,18 +133,18 @@ export function HomePage() {
                   opacity: 1,
                 }
                 : {
-                  opacity: [0, 1, 1, 1, 1],
-                  y: [140, -110, 0, -14, 0],
-                  scale: [0.25, 0.25, 1.08, 0.96, 1],
+                  opacity: [0, 1, 1],
+                  y: [140, -110, 0],
+                  scale: [0.25, 0.25, 1],
                 }
             }
             transition={
               isMovingOrSettled
-                ? { duration: 0.65, ease: [0.16, 1, 0.3, 1] }
+                ? { duration: 0.9, ease: [0.16, 1, 0.3, 1] }
                 : {
-                  duration: 1.2,
-                  times: [0, 0.38, 0.7, 0.88, 1],
-                  ease: ['easeOut', 'easeIn', 'easeOut', 'easeIn'],
+                  duration: 1.0,
+                  times: [0, 0.45, 1],
+                  ease: ['easeOut', [0.16, 1, 0.3, 1]],
                 }
             }
             className="w-[84px] h-[84px] rounded-full overflow-hidden ring-2 ring-white/25 shadow-[0_8px_50px_rgba(255,255,255,0.10)]"
@@ -174,9 +174,9 @@ export function HomePage() {
             }
             transition={
               isMovingOrSettled
-                ? { duration: 0.65, ease: [0.16, 1, 0.3, 1] }
+                ? { duration: 0.9, ease: [0.16, 1, 0.3, 1] }
                 : {
-                  delay: 1.35,
+                  delay: 1.6,
                   duration: 1.15,
                   times: [0, 0.35, 0.82, 1],
                   ease: ['easeOut', [0.34, 1.56, 0.64, 1], 'easeOut'] as any,
