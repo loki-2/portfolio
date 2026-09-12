@@ -17,11 +17,11 @@ export function HomePage() {
 
   useEffect(() => {
     // Stage 1: Center intro sequence (0 -> 3800ms)
-    // 0ms -> 440ms: Small ball (scale: 0.25) shoots up to y: -110
-    // 440ms -> 850ms: Small ball falls down to y: 0
-    // 850ms -> 1240ms: PAUSE sitting at y: 0 as small ball (scale: 0.25)
-    // 1240ms -> 1700ms: Small ball smoothly expands to full size (scale: 1.0)
-    // 1800ms: Heading emerges AFTER avatar finishes expanding (delay: 1.8s)
+    // 0ms -> 400ms: Small ball (scale: 0.25) shoots up to y: -110
+    // 400ms -> 750ms: Small ball falls down to 1st ground impact (y: 0)
+    // 750ms -> 1190ms: Small ball 2nd bounce (y: -26) and 2nd landing (y: 0)
+    // 1190ms -> 1700ms: Small ball smoothly expands to full size (scale: 1.0)
+    // 1800ms: Heading emerges AFTER avatar finishes 2nd bounce and expansion (delay: 1.8s)
     // 2900ms -> 3800ms: Pause so user reads settled text
     const t1 = setTimeout(() => {
       if (introAvatarRef.current && introHeadingRef.current && sidebarRef.current) {
@@ -122,7 +122,7 @@ export function HomePage() {
           transition={{ duration: 0.6, ease: 'easeOut' }}
           className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center gap-7 pointer-events-none"
         >
-          {/* Avatar: small ball shoots up -> falls small -> pauses sitting down -> expands smoothly */}
+          {/* Avatar: small ball shoots up -> falls -> 2nd bounce -> lands -> expands smoothly */}
           <motion.div
             ref={introAvatarRef}
             initial={{ opacity: 0, y: 140, scale: 0.25 }}
@@ -135,9 +135,9 @@ export function HomePage() {
                   opacity: 1,
                 }
                 : {
-                  opacity: [0, 1, 1, 1, 1],
-                  y: [140, -110, 0, 0, 0],
-                  scale: [0.25, 0.25, 0.25, 0.25, 1],
+                  opacity: [0, 1, 1, 1, 1, 1],
+                  y: [140, -110, 0, -26, 0, 0],
+                  scale: [0.25, 0.25, 0.25, 0.25, 0.25, 1],
                 }
             }
             transition={
@@ -145,8 +145,8 @@ export function HomePage() {
                 ? { duration: 0.65, ease: [0.16, 1, 0.3, 1] }
                 : {
                   duration: 1.7,
-                  times: [0, 0.26, 0.50, 0.73, 1],
-                  ease: ['easeOut', 'easeIn', 'easeOut', [0.34, 1.3, 0.64, 1]] as any,
+                  times: [0, 0.24, 0.44, 0.58, 0.70, 1],
+                  ease: ['easeOut', 'easeIn', 'easeOut', 'easeIn', [0.34, 1.3, 0.64, 1]] as any,
                 }
             }
             className="w-[84px] h-[84px] rounded-full overflow-hidden ring-2 ring-white/25 shadow-[0_8px_50px_rgba(255,255,255,0.10)]"
