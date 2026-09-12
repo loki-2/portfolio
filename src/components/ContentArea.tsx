@@ -55,16 +55,16 @@ function projectToWorkItem(
 // ─── Skeleton card ────────────────────────────────────────────────────────────
 function WorkCardSkeleton() {
   return (
-    <div className="relative w-full rounded-2xl overflow-hidden flex flex-col lg:flex-row items-stretch bg-white/[0.03] animate-pulse h-auto lg:h-[480px]">
+    <div className="relative w-full rounded-xl overflow-hidden flex flex-col lg:flex-row items-stretch bg-[#131313] border border-white/[0.08] animate-pulse h-auto lg:h-[480px]">
       <div className="flex flex-col justify-end p-6 sm:p-7 lg:p-9 flex-1 gap-4">
-        <div className="h-6 w-3/4 bg-white/[0.07] rounded-lg" />
-        <div className="h-4 w-1/2 bg-white/[0.05] rounded" />
-        <div className="flex gap-2">
-          <div className="h-5 w-16 bg-white/[0.05] rounded-full" />
-          <div className="h-5 w-20 bg-white/[0.05] rounded-full" />
+        <div className="h-7 w-3/4 bg-white/10 rounded-lg" />
+        <div className="h-4 w-1/2 bg-white/5 rounded" />
+        <div className="flex gap-2 pt-2">
+          <div className="h-6 w-16 bg-white/5 rounded-md" />
+          <div className="h-6 w-20 bg-white/5 rounded-md" />
         </div>
       </div>
-      <div className="w-full lg:w-[42%] h-52 lg:h-auto bg-white/[0.02]" />
+      <div className="w-full lg:w-[45%] h-52 lg:h-auto bg-white/[0.03]" />
     </div>
   );
 }
