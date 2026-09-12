@@ -16,13 +16,14 @@ export function HomePage() {
   const headingExitRef = useRef({ x: 0, y: 0, scale: 1 });
 
   useEffect(() => {
-    // Stage 1: Center intro sequence (0 -> 3800ms)
+    // Stage 1: Center intro sequence (0 -> 4200ms)
     // 0ms -> 400ms: Small ball (scale: 0.25) shoots up to y: -110
     // 400ms -> 750ms: Small ball falls down to 1st ground impact (y: 0)
     // 750ms -> 1190ms: Small ball 2nd bounce (y: -26) and 2nd landing (y: 0)
     // 1190ms -> 1700ms: Small ball smoothly expands to full size (scale: 1.0)
-    // 1800ms: Heading emerges AFTER avatar finishes 2nd bounce and expansion (delay: 1.8s)
-    // 2900ms -> 3800ms: Pause so user reads settled text
+    // 1800ms -> 2350ms: Heading emerges wide (0.28em) and holds wide for 550ms
+    // 2350ms -> 3150ms: Letter-spacing shrinks smoothly over 800ms down to -0.025em
+    // 3150ms -> 4200ms: Pause so user reads settled text
     const t1 = setTimeout(() => {
       if (introAvatarRef.current && introHeadingRef.current && sidebarRef.current) {
         const sidebarAvatarEl = sidebarRef.current.getAvatarEl();
@@ -62,17 +63,17 @@ export function HomePage() {
       }
 
       setPhase('moving');
-    }, 3800);
+    }, 4200);
 
-    // Stage 2: Arrive & settle at sidebar target (3800 + 650 = 4450ms)
+    // Stage 2: Arrive & settle at sidebar target (4200 + 650 = 4850ms)
     const t2 = setTimeout(() => {
       setPhase('settled');
-    }, 4450);
+    }, 4850);
 
-    // Stage 3: Clean up overlay DOM (4450 + 600 = 5050ms)
+    // Stage 3: Clean up overlay DOM (4850 + 600 = 5450ms)
     const t3 = setTimeout(() => {
       setPhase('done');
-    }, 5050);
+    }, 5450);
 
     return () => {
       clearTimeout(t1);
@@ -154,10 +155,10 @@ export function HomePage() {
             <img src="/avatar.png" alt="Abhishek" className="w-full h-full object-cover" />
           </motion.div>
 
-          {/* Heading: subtle letter spacing -> holds -> elastic spring squeeze -> rebounds into position */}
+          {/* Heading: wide letter spacing (0.28em) -> holds 550ms -> smoothly shrinks over 800ms -> rebounds to -0.025em */}
           <motion.h1
             ref={introHeadingRef}
-            initial={{ opacity: 0, letterSpacing: '0.14em', y: 12 }}
+            initial={{ opacity: 0, letterSpacing: '0.28em', y: 12 }}
             animate={
               isMovingOrSettled
                 ? {
@@ -170,7 +171,7 @@ export function HomePage() {
                 : {
                   opacity: [0, 1, 1, 1],
                   y: [12, 0, 0, 0],
-                  letterSpacing: ['0.14em', '0.14em', '-0.035em', '-0.025em'],
+                  letterSpacing: ['0.28em', '0.28em', '-0.04em', '-0.025em'],
                   scale: [1, 1, 1.02, 1],
                 }
             }
@@ -179,9 +180,9 @@ export function HomePage() {
                 ? { duration: 0.65, ease: [0.16, 1, 0.3, 1] }
                 : {
                   delay: 1.8,
-                  duration: 1.15,
-                  times: [0, 0.35, 0.82, 1],
-                  ease: ['easeOut', [0.34, 1.56, 0.64, 1], 'easeOut'] as any,
+                  duration: 1.6,
+                  times: [0, 0.35, 0.85, 1],
+                  ease: ['easeOut', [0.16, 1, 0.3, 1], 'easeOut'] as any,
                 }
             }
             className="text-3xl lg:text-4xl font-semibold text-white tracking-tight leading-[1.15] text-center inline-block"
