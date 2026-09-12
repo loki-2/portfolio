@@ -16,11 +16,12 @@ export function HomePage() {
   const headingExitRef = useRef({ x: 0, y: 0, scale: 1 });
 
   useEffect(() => {
-    // Stage 1: Center intro sequence (0 -> 3300ms)
-    // 0ms -> 1200ms: Ball arc (thrown up, drops & lands, bounces & fully settles at 1200ms)
-    // 1350ms -> 1800ms: Heading emerges AFTER avatar settles (delay: 1.35s)
-    // 1800ms -> 2450ms: Letter-spacing tightens to -0.025em
-    // 2450ms -> 3300ms: Pause so user reads settled text
+    // Stage 1: Center intro sequence (0 -> 3400ms)
+    // 0ms -> 470ms: Small ball (scale: 0.25) shoots up to y: -110
+    // 470ms -> 880ms: Small ball falls down to y: 0 (no bounce)
+    // 880ms -> 1350ms: Small ball smoothly expands to full size (scale: 1.0) at center
+    // 1450ms: Heading emerges AFTER avatar expands & settles (delay: 1.45s)
+    // 2500ms -> 3400ms: Pause so user reads settled text
     const t1 = setTimeout(() => {
       if (introAvatarRef.current && introHeadingRef.current && sidebarRef.current) {
         const sidebarAvatarEl = sidebarRef.current.getAvatarEl();
@@ -60,17 +61,17 @@ export function HomePage() {
       }
 
       setPhase('moving');
-    }, 3300);
+    }, 3400);
 
-    // Stage 2: Arrive & settle at sidebar target (3300 + 650 = 3950ms)
+    // Stage 2: Arrive & settle at sidebar target (3400 + 650 = 4050ms)
     const t2 = setTimeout(() => {
       setPhase('settled');
-    }, 3950);
+    }, 4050);
 
-    // Stage 3: Clean up overlay DOM (3950 + 600 = 4550ms)
+    // Stage 3: Clean up overlay DOM (4050 + 600 = 4650ms)
     const t3 = setTimeout(() => {
       setPhase('done');
-    }, 4400);
+    }, 4650);
 
     return () => {
       clearTimeout(t1);
@@ -120,33 +121,31 @@ export function HomePage() {
           transition={{ duration: 0.6, ease: 'easeOut' }}
           className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center gap-7 pointer-events-none"
         >
-          {/* Avatar: Aperture / Soft Lens Unfold (shoots up as small dot -> unfolds & focuses as it lands) */}
+          {/* Avatar: small ball shoots up -> falls small -> lands cleanly -> expands smoothly to full size */}
           <motion.div
             ref={introAvatarRef}
-            initial={{ opacity: 0, y: 140, scale: 0.25, filter: 'blur(8px)' }}
+            initial={{ opacity: 0, y: 140, scale: 0.25 }}
             animate={
               isMovingOrSettled
                 ? {
                   x: avatarExitRef.current.x,
                   y: avatarExitRef.current.y,
                   scale: avatarExitRef.current.scale,
-                  filter: 'blur(0px)',
                   opacity: 1,
                 }
                 : {
-                  opacity: [0, 1, 1],
-                  y: [140, -110, 0],
-                  scale: [0.25, 0.25, 1],
-                  filter: ['blur(8px)', 'blur(6px)', 'blur(0px)'],
+                  opacity: [0, 1, 1, 1],
+                  y: [140, -110, 0, 0],
+                  scale: [0.25, 0.25, 0.25, 1],
                 }
             }
             transition={
               isMovingOrSettled
-                ? { duration: 0.9, ease: [0.16, 1, 0.3, 1] }
+                ? { duration: 0.65, ease: [0.16, 1, 0.3, 1] }
                 : {
-                  duration: 1.05,
-                  times: [0, 0.45, 1],
-                  ease: ['easeOut', [0.16, 1, 0.3, 1]],
+                  duration: 1.35,
+                  times: [0, 0.35, 0.65, 1],
+                  ease: ['easeOut', 'easeIn', [0.34, 1.3, 0.64, 1]] as any,
                 }
             }
             className="w-[84px] h-[84px] rounded-full overflow-hidden ring-2 ring-white/25 shadow-[0_8px_50px_rgba(255,255,255,0.10)]"
@@ -176,9 +175,9 @@ export function HomePage() {
             }
             transition={
               isMovingOrSettled
-                ? { duration: 0.9, ease: [0.16, 1, 0.3, 1] }
+                ? { duration: 0.65, ease: [0.16, 1, 0.3, 1] }
                 : {
-                  delay: 1.6,
+                  delay: 1.45,
                   duration: 1.15,
                   times: [0, 0.35, 0.82, 1],
                   ease: ['easeOut', [0.34, 1.56, 0.64, 1], 'easeOut'] as any,
