@@ -345,8 +345,6 @@ const MinimalMusicPlayer: React.FC = () => {
   );
 };
 
-import { motion } from 'framer-motion';
-
 // ─── Content Area ─────────────────────────────────────────────────────────────
 export const ContentArea: React.FC = () => {
   const [workItems, setWorkItems] = useState<WorkItem[]>([]);
@@ -381,13 +379,7 @@ export const ContentArea: React.FC = () => {
       {/* Subtle background grid lines */}
       <div className="absolute inset-0 bg-grid-pattern pointer-events-none z-0" />
 
-      {/* Content fades in gracefully on mount */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.75, delay: 0.35, ease: 'easeOut' }}
-        className="flex flex-col gap-5 lg:gap-6 relative z-10 w-full"
-      >
+      <div className="flex flex-col gap-5 lg:gap-6 relative z-10 w-full">
 
       {/* WORK SECTION */}
       <section id="work" className="scroll-mt-10 flex flex-col gap-5 lg:gap-6 relative z-10">
@@ -624,7 +616,7 @@ export const ContentArea: React.FC = () => {
           </Button>
         </div>
       </section>
-      </motion.div>
+      </div>
     </main>
   );
 };
