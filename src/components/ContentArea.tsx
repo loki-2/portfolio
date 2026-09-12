@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { ArrowRight, Play, Pause } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { WorkItem, NotionProject } from '@/lib/types';
@@ -376,12 +375,7 @@ export const ContentArea: React.FC = () => {
   }, []);
 
   return (
-    <motion.main
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: 'easeOut', delay: 1.0 }}
-      className="flex-1 pb-4 pt-4 lg:pt-8 px-4 lg:px-6 flex flex-col gap-5 lg:gap-6 relative min-h-full"
-    >
+    <main className="flex-1 pb-4 pt-4 lg:pt-8 px-4 lg:px-6 flex flex-col gap-5 lg:gap-6 relative min-h-full">
       {/* Subtle background grid lines (rows and columns) */}
       <div className="absolute inset-0 bg-grid-pattern pointer-events-none z-0" />
 
@@ -615,11 +609,11 @@ export const ContentArea: React.FC = () => {
               target="_blank"
               rel="noopener noreferrer"
             >
-              Let's Chat
+              Let's Connect
             </a>
           </Button>
         </div>
       </section>
-    </motion.main>
+    </main>
   );
 };

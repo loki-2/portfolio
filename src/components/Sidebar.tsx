@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 
 interface SidebarProps {
@@ -20,7 +19,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeSection, scrollToSection
       {/* TOP ROW MOBILE / TOP SECTION DESKTOP */}
       <div className="flex flex-col gap-6 lg:gap-6">
 
-        {/* Mobile Header: Avatar + Nav — no animation on mobile */}
+        {/* Mobile Header: Avatar + Nav */}
         <div className="flex justify-between items-start lg:hidden">
           <div className="w-12 h-12 rounded-full overflow-hidden bg-white/10 ring-1 ring-white/20">
             <img src="/avatar.png" alt="Abhishek" className="w-full h-full object-cover" />
@@ -38,48 +37,28 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeSection, scrollToSection
           </nav>
         </div>
 
-        {/* Desktop Avatar — drops in from above, grows into place */}
-        <motion.div
-          initial={{ opacity: 0, y: -48, scale: 0.4 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.7, ease: 'easeOut' }}
-          className="hidden lg:block w-12 h-12 rounded-full overflow-hidden bg-white/10 ring-1 ring-white/20"
-        >
+        {/* Desktop Avatar */}
+        <div className="hidden lg:block w-12 h-12 rounded-full overflow-hidden bg-white/10 ring-1 ring-white/20">
           <img src="/avatar.png" alt="Abhishek" className="w-full h-full object-cover" />
-        </motion.div>
+        </div>
 
-        {/* Heading — rises up after avatar lands */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.65, ease: 'easeOut', delay: 0.55 }}
-          className="mt-2 lg:mt-3"
-        >
+        {/* Heading */}
+        <div className="mt-2 lg:mt-3">
           <h1 className="text-3xl lg:text-4xl font-semibold leading-[1.15] tracking-tight text-white">
             Hey! I'm Abhishek.<br className="hidden lg:block" />
             <span className="text-white/48 font-medium lg:ml-0 ml-2">
               Product Designer &amp; Builder.
             </span>
           </h1>
-        </motion.div>
+        </div>
 
-        {/* Description — fades in and drifts up */}
-        <motion.p
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease: 'easeOut', delay: 0.82 }}
-          className="text-base lg:text-base font-semibold text-white/48 leading-relaxed max-w-sm"
-        >
+        {/* Description */}
+        <p className="text-base lg:text-base font-semibold text-white/48 leading-relaxed max-w-sm">
           3+ years of experience in designing products at fast-paced, high-ownership startups—from MVP to Growth.
-        </motion.p>
+        </p>
 
-        {/* CTA Button + status badge */}
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease: 'easeOut', delay: 1.0 }}
-          className="flex flex-col gap-4 lg:gap-3 pt-4"
-        >
+        {/* CTA Button */}
+        <div className="flex flex-col gap-4 lg:gap-3 pt-4">
           <Button
             asChild
             className="w-fit rounded-full bg-white text-black text-sm font-bold px-5 py-2 h-auto hover:bg-white/85 transition-colors"
@@ -101,16 +80,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeSection, scrollToSection
             </span>
             <span className="text-sm lg:text-sm text-emerald-400/80">Exploring high-agency roles</span>
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* BOTTOM — Footer row */}
-      <motion.div
-        initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.55, ease: 'easeOut', delay: 1.18 }}
-        className="flex flex-col gap-6 lg:gap-5"
-      >
+      <div className="flex flex-col gap-6 lg:gap-5">
         <div className="hidden lg:flex items-center justify-between text-[11px] text-white/30">
           {/* LinkedIn icon */}
           <a
@@ -133,7 +107,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeSection, scrollToSection
             abhishek.edla1203@gmail.com
           </a>
         </div>
-      </motion.div>
+      </div>
     </aside>
   );
 };
