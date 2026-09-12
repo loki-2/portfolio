@@ -16,12 +16,13 @@ export function HomePage() {
   const headingExitRef = useRef({ x: 0, y: 0, scale: 1 });
 
   useEffect(() => {
-    // Stage 1: Center intro sequence (0 -> 3400ms)
-    // 0ms -> 470ms: Small ball (scale: 0.25) shoots up to y: -110
-    // 470ms -> 880ms: Small ball falls down to y: 0 (no bounce)
-    // 880ms -> 1350ms: Small ball smoothly expands to full size (scale: 1.0) at center
-    // 1450ms: Heading emerges AFTER avatar expands & settles (delay: 1.45s)
-    // 2500ms -> 3400ms: Pause so user reads settled text
+    // Stage 1: Center intro sequence (0 -> 3800ms)
+    // 0ms -> 440ms: Small ball (scale: 0.25) shoots up to y: -110
+    // 440ms -> 850ms: Small ball falls down to y: 0
+    // 850ms -> 1240ms: PAUSE sitting at y: 0 as small ball (scale: 0.25)
+    // 1240ms -> 1700ms: Small ball smoothly expands to full size (scale: 1.0)
+    // 1800ms: Heading emerges AFTER avatar finishes expanding (delay: 1.8s)
+    // 2900ms -> 3800ms: Pause so user reads settled text
     const t1 = setTimeout(() => {
       if (introAvatarRef.current && introHeadingRef.current && sidebarRef.current) {
         const sidebarAvatarEl = sidebarRef.current.getAvatarEl();
@@ -61,17 +62,17 @@ export function HomePage() {
       }
 
       setPhase('moving');
-    }, 3400);
+    }, 3800);
 
-    // Stage 2: Arrive & settle at sidebar target (3400 + 650 = 4050ms)
+    // Stage 2: Arrive & settle at sidebar target (3800 + 650 = 4450ms)
     const t2 = setTimeout(() => {
       setPhase('settled');
-    }, 4050);
+    }, 4450);
 
-    // Stage 3: Clean up overlay DOM (4050 + 600 = 4650ms)
+    // Stage 3: Clean up overlay DOM (4450 + 600 = 5050ms)
     const t3 = setTimeout(() => {
       setPhase('done');
-    }, 4650);
+    }, 5050);
 
     return () => {
       clearTimeout(t1);
@@ -121,7 +122,7 @@ export function HomePage() {
           transition={{ duration: 0.6, ease: 'easeOut' }}
           className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center gap-7 pointer-events-none"
         >
-          {/* Avatar: small ball shoots up -> falls small -> lands cleanly -> expands smoothly to full size */}
+          {/* Avatar: small ball shoots up -> falls small -> pauses sitting down -> expands smoothly */}
           <motion.div
             ref={introAvatarRef}
             initial={{ opacity: 0, y: 140, scale: 0.25 }}
@@ -134,18 +135,18 @@ export function HomePage() {
                   opacity: 1,
                 }
                 : {
-                  opacity: [0, 1, 1, 1],
-                  y: [140, -110, 0, 0],
-                  scale: [0.25, 0.25, 0.25, 1],
+                  opacity: [0, 1, 1, 1, 1],
+                  y: [140, -110, 0, 0, 0],
+                  scale: [0.25, 0.25, 0.25, 0.25, 1],
                 }
             }
             transition={
               isMovingOrSettled
                 ? { duration: 0.65, ease: [0.16, 1, 0.3, 1] }
                 : {
-                  duration: 1.35,
-                  times: [0, 0.35, 0.65, 1],
-                  ease: ['easeOut', 'easeIn', [0.34, 1.3, 0.64, 1]] as any,
+                  duration: 1.7,
+                  times: [0, 0.26, 0.50, 0.73, 1],
+                  ease: ['easeOut', 'easeIn', 'easeOut', [0.34, 1.3, 0.64, 1]] as any,
                 }
             }
             className="w-[84px] h-[84px] rounded-full overflow-hidden ring-2 ring-white/25 shadow-[0_8px_50px_rgba(255,255,255,0.10)]"
@@ -177,7 +178,7 @@ export function HomePage() {
               isMovingOrSettled
                 ? { duration: 0.65, ease: [0.16, 1, 0.3, 1] }
                 : {
-                  delay: 1.45,
+                  delay: 1.8,
                   duration: 1.15,
                   times: [0, 0.35, 0.82, 1],
                   ease: ['easeOut', [0.34, 1.56, 0.64, 1], 'easeOut'] as any,
