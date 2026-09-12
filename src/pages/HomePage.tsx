@@ -152,10 +152,10 @@ export function HomePage() {
             <img src="/avatar.png" alt="Abhishek" className="w-full h-full object-cover" />
           </motion.div>
 
-          {/* Heading: wide letter spacing -> holds wide -> elastic spring squeeze overshoot -> rebounds into position */}
+          {/* Heading: subtle letter spacing -> holds -> elastic spring squeeze -> rebounds into position */}
           <motion.h1
             ref={introHeadingRef}
-            initial={{ opacity: 0, letterSpacing: '0.42em', y: 12 }}
+            initial={{ opacity: 0, letterSpacing: '0.14em', y: 12 }}
             animate={
               isMovingOrSettled
                 ? {
@@ -168,8 +168,8 @@ export function HomePage() {
                 : {
                   opacity: [0, 1, 1, 1],
                   y: [12, 0, 0, 0],
-                  letterSpacing: ['0.42em', '0.42em', '-0.045em', '-0.025em'],
-                  scale: [1, 1, 1.03, 1],
+                  letterSpacing: ['0.14em', '0.14em', '-0.035em', '-0.025em'],
+                  scale: [1, 1, 1.02, 1],
                 }
             }
             transition={
