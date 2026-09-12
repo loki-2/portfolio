@@ -348,14 +348,9 @@ const MinimalMusicPlayer: React.FC = () => {
 import { motion } from 'framer-motion';
 
 // ─── Content Area ─────────────────────────────────────────────────────────────
-interface ContentAreaProps {
-  introPhase?: 'center' | 'morphing' | 'done';
-}
-
-export const ContentArea: React.FC<ContentAreaProps> = ({ introPhase = 'done' }) => {
+export const ContentArea: React.FC = () => {
   const [workItems, setWorkItems] = useState<WorkItem[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const isMorphingOrDone = introPhase !== 'center';
 
   useEffect(() => {
     let cancelled = false;
@@ -383,14 +378,14 @@ export const ContentArea: React.FC<ContentAreaProps> = ({ introPhase = 'done' })
 
   return (
     <main className="flex-1 pb-4 pt-4 lg:pt-8 px-4 lg:px-6 flex flex-col gap-5 lg:gap-6 relative min-h-full">
-      {/* Subtle background grid lines (rows and columns) — ALWAYS visible */}
+      {/* Subtle background grid lines */}
       <div className="absolute inset-0 bg-grid-pattern pointer-events-none z-0" />
 
-      {/* Main sections wrapper — animates in once morph starts */}
+      {/* Content fades in gracefully on mount */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: isMorphingOrDone ? 1 : 0, y: isMorphingOrDone ? 0 : 20 }}
-        transition={{ duration: 0.8, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.75, delay: 0.35, ease: 'easeOut' }}
         className="flex flex-col gap-5 lg:gap-6 relative z-10 w-full"
       >
 
