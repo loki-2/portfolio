@@ -145,28 +145,30 @@ export function HomePage() {
           {/* Heading */}
           <motion.h1
             ref={introHeadingRef}
-            initial={{ opacity: 0, letterSpacing: '0.45em', y: 8 }}
+            initial={{ opacity: 0, letterSpacing: '0.25em', y: 8 }}
             animate={
               isMovingOrSettled
                 ? {
                     x: headingExitRef.current.x,
                     y: headingExitRef.current.y,
                     scale: headingExitRef.current.scale,
-                    opacity: 1, // Full opacity while moving & settling!
+                    letterSpacing: '-0.025em',
+                    opacity: 1,
                   }
-                : { opacity: 1, letterSpacing: '-0.01em', y: 0 }
+                : { opacity: 1, letterSpacing: '-0.025em', y: 0 }
             }
             transition={
               isMovingOrSettled
-                ? { duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.02 }
+                ? { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
                 : {
                     delay: 0.98,
                     duration: 0.65,
                     ease: 'easeOut',
+                    letterSpacing: { delay: 0.98, duration: 0.65, ease: 'easeOut' },
                     opacity: { delay: 0.98, duration: 0.22, ease: 'easeOut' },
                   }
             }
-            className="text-3xl lg:text-[2.75rem] font-semibold text-white text-center leading-tight"
+            className="text-3xl lg:text-4xl font-semibold text-white tracking-tight leading-[1.15] text-center inline-block"
           >
             Hey! I'm Abhishek.
           </motion.h1>
