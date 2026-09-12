@@ -120,7 +120,7 @@ export function HomePage() {
           transition={{ duration: 0.45, ease: 'easeOut' }}
           className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center gap-7 pointer-events-none"
         >
-          {/* Avatar: physics ball (thrown up -> drops & impacts text -> bounce -> settle) */}
+          {/* Avatar: physics ball (small ball going up -> grows coming down -> impacts text -> bounce -> settle) */}
           <motion.div
             ref={introAvatarRef}
             initial={{ opacity: 0, y: 140, scale: 0.25 }}
@@ -135,7 +135,7 @@ export function HomePage() {
                 : {
                   opacity: [0, 1, 1, 1, 1],
                   y: [140, -110, 0, -14, 0],
-                  scale: [0.25, 0.9, 1.08, 0.96, 1],
+                  scale: [0.25, 0.25, 1.08, 0.96, 1],
                 }
             }
             transition={
