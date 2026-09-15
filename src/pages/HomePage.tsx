@@ -16,11 +16,11 @@ export function HomePage() {
   const headingExitRef = useRef({ x: 0, y: 0, scale: 1 });
 
   useEffect(() => {
-    // Stage 1: Center intro sequence (0 -> 2700ms)
-    // 0ms -> 1500ms: Avatar drops, 2nd bounce, expands
-    // 1500ms: Heading emerges (delay: 1.5s)
-    // 1740ms -> 2340ms: Letter-spacing shrinks fast-first then decelerates smoothly
-    // 2700ms: Heading finishes settling, immediately move to sidebar
+    // Stage 1: Center intro sequence (0 -> 3200ms)
+    // 0ms -> 2000ms: Avatar drops, 2nd bounce, and fully expands to 1.0 scale
+    // 2000ms: Heading emerges AFTER avatar expands full (delay: 2.0s)
+    // 2180ms -> 2780ms: Letter-spacing shrinks fast-first then decelerates smoothly
+    // 3200ms: Heading finishes settling, immediately move to sidebar
     const tMove = setTimeout(() => {
       if (introAvatarRef.current && introHeadingRef.current && sidebarRef.current) {
         const sidebarAvatarEl = sidebarRef.current.getAvatarEl();
@@ -60,17 +60,17 @@ export function HomePage() {
       }
 
       setPhase('moving');
-    }, 2700);
+    }, 3200);
 
-    // Stage 2: Arrive & settle at sidebar target (2700 + 650 = 3350ms)
+    // Stage 2: Arrive & settle at sidebar target (3200 + 650 = 3850ms)
     const tSettle = setTimeout(() => {
       setPhase('settled');
-    }, 3350);
+    }, 3850);
 
-    // Stage 3: Clean up overlay DOM (3350 + 600 = 3950ms)
+    // Stage 3: Clean up overlay DOM (3850 + 600 = 4450ms)
     const tDone = setTimeout(() => {
       setPhase('done');
-    }, 3950);
+    }, 4450);
 
     return () => {
       clearTimeout(tMove);
@@ -175,9 +175,9 @@ export function HomePage() {
               phase === 'moving' || phase === 'settled'
                 ? { duration: 0.65, ease: [0.16, 1, 0.3, 1] }
                 : {
-                  delay: 1.5,
+                  delay: 2.0,
                   duration: 1.2,
-                  times: [0, 0.2, 0.7, 1],
+                  times: [0, 0.15, 0.65, 1],
                   ease: ['easeOut', [0.05, 0.9, 0.1, 1], 'easeOut'] as any,
                 }
             }
