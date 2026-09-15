@@ -314,8 +314,7 @@ export function SectionContent({ section, isFirst }: { section: ProjectSection; 
       className={`w-full ${isFirst ? 'mt-4 lg:mt-6' : 'mt-4 lg:mt-6'}`}
     >
       <div
-        className="w-full px-4 lg:px-6 py-8 lg:py-12"
-        style={{ background: '#131313', borderRadius: 12 }}
+        className="w-full px-4 lg:px-6 py-8 lg:py-12 border border-white/[0.08] rounded-xl bg-transparent"
       >
         <div className="w-full flex flex-col gap-4">
           <h2 className={`text-2xl lg:text-3xl font-semibold text-white tracking-tight ${TEXT_WRAPPER}`}>{section.title}</h2>

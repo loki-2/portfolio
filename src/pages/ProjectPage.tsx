@@ -393,95 +393,99 @@ export function ProjectPage() {
       />
 
       {/* Scrollable right content */}
-      <div ref={contentRef} className="flex-1 lg:h-screen lg:overflow-y-auto pt-4 lg:pt-8 pb-6 lg:pb-8">
+      <div ref={contentRef} className="flex-1 lg:h-screen lg:overflow-y-auto pt-4 lg:pt-8 pb-6 lg:pb-8 relative">
+        {/* Background grid lines pattern */}
+        <div className="absolute inset-0 bg-grid-pattern pointer-events-none z-0" />
 
-        {/* Hero banner — keeps its own horizontal padding */}
-        <div className="px-4 lg:px-4">
-          <HeroBanner
-            notionPageId={project.notionPageId}
-            bgClass={activeBgClass}
-            bgGradient={activeBgGradient}
-            coverImage={activeCoverImage}
-          />
-        </div>
+        <div className="relative z-10">
+          {/* Hero banner — keeps its own horizontal padding */}
+          <div className="px-4 lg:px-4">
+            <HeroBanner
+              notionPageId={project.notionPageId}
+              bgClass={activeBgClass}
+              bgGradient={activeBgGradient}
+              coverImage={activeCoverImage}
+            />
+          </div>
 
-        {/* Notion content sections — 48px side margins */}
-        <div className="mt-1 px-4">
-          {sections.map((section, i) => (
-            <SectionContent key={section.title} section={section} isFirst={i === 0} />
-          ))}
+          {/* Notion content sections — 48px side margins */}
+          <div className="mt-1 px-4">
+            {sections.map((section, i) => (
+              <SectionContent key={section.title} section={section} isFirst={i === 0} />
+            ))}
 
-          {/* Twitter / X posts 2-row continuous ticker — rendered ONLY for the first article */}
-          {isFirstProject && <TwitterTickerSection />}
+            {/* Twitter / X posts 2-row continuous ticker — rendered ONLY for the first article */}
+            {isFirstProject && <TwitterTickerSection />}
 
-          {sections.length === 0 && (
-            <div className="flex items-center justify-center py-24">
-              <p className="text-sm text-white/80">No content found in this Notion page yet.</p>
-            </div>
-          )}
+            {sections.length === 0 && (
+              <div className="flex items-center justify-center py-24">
+                <p className="text-sm text-white/80">No content found in this Notion page yet.</p>
+              </div>
+            )}
 
-          {/* Prev / Next Project Navigation Cards */}
-          {(prevProject || nextProject) && (
-            <div className="mt-8 sm:mt-14 mb-8 pt-6 sm:pt-8 border-t border-white/[0.08] flex flex-col sm:flex-row gap-4 justify-between items-stretch">
-              {/* Previous Project Card */}
-              {prevProject ? (
-                <button
-                  onClick={() => {
-                    const prevIdx = currentIndex - 1;
-                    navigate(`/project/${prevProject.notionPageId}`, {
-                      state: {
-                        bgClass: BG_CLASSES[prevIdx % BG_CLASSES.length],
-                        bgGradient: BG_GRADIENTS[prevIdx],
-                        coverImage: COVER_IMAGES[prevIdx] ?? COVER_IMAGES[0],
-                      },
-                    });
-                  }}
-                  className="flex-1 flex flex-col gap-1.5 p-4 sm:p-5 rounded-xl bg-[#131313] border border-white/[0.08] hover:border-white/20 hover:bg-white/[0.04] transition-all text-left group cursor-pointer"
-                >
-                  <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-white/40 font-medium group-hover:text-white/70 transition-colors">
-                    <svg className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="m15 18-6-6 6-6" />
-                    </svg>
-                    <span>Previous Project</span>
-                  </div>
-                  <h4 className="text-sm sm:text-base font-semibold text-white group-hover:text-white transition-colors line-clamp-1">
-                    {prevProject.title}
-                  </h4>
-                </button>
-              ) : (
-                <div className="flex-1 hidden sm:block" />
-              )}
+            {/* Prev / Next Project Navigation Cards */}
+            {(prevProject || nextProject) && (
+              <div className="mt-8 sm:mt-14 mb-8 pt-6 sm:pt-8 border-t border-white/[0.08] flex flex-col sm:flex-row gap-4 justify-between items-stretch">
+                {/* Previous Project Card */}
+                {prevProject ? (
+                  <button
+                    onClick={() => {
+                      const prevIdx = currentIndex - 1;
+                      navigate(`/project/${prevProject.notionPageId}`, {
+                        state: {
+                          bgClass: BG_CLASSES[prevIdx % BG_CLASSES.length],
+                          bgGradient: BG_GRADIENTS[prevIdx],
+                          coverImage: COVER_IMAGES[prevIdx] ?? COVER_IMAGES[0],
+                        },
+                      });
+                    }}
+                    className="flex-1 flex flex-col gap-1.5 p-4 sm:p-5 rounded-xl bg-transparent border border-white/[0.08] hover:border-white/20 hover:bg-white/[0.04] transition-all text-left group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-white/40 font-medium group-hover:text-white/70 transition-colors">
+                      <svg className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="m15 18-6-6 6-6" />
+                      </svg>
+                      <span>Previous Project</span>
+                    </div>
+                    <h4 className="text-sm sm:text-base font-semibold text-white group-hover:text-white transition-colors line-clamp-1">
+                      {prevProject.title}
+                    </h4>
+                  </button>
+                ) : (
+                  <div className="flex-1 hidden sm:block" />
+                )}
 
-              {/* Next Project Card */}
-              {nextProject ? (
-                <button
-                  onClick={() => {
-                    const nextIdx = currentIndex + 1;
-                    navigate(`/project/${nextProject.notionPageId}`, {
-                      state: {
-                        bgClass: BG_CLASSES[nextIdx % BG_CLASSES.length],
-                        bgGradient: BG_GRADIENTS[nextIdx],
-                        coverImage: COVER_IMAGES[nextIdx] ?? COVER_IMAGES[0],
-                      },
-                    });
-                  }}
-                  className="flex-1 flex flex-col gap-1.5 items-end p-4 sm:p-5 rounded-xl bg-[#131313] border border-white/[0.08] hover:border-white/20 hover:bg-white/[0.04] transition-all text-right group cursor-pointer"
-                >
-                  <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-white/40 font-medium group-hover:text-white/70 transition-colors">
-                    <span>Next Project</span>
-                    <svg className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="m9 18 6-6-6-6" />
-                    </svg>
-                  </div>
-                  <h4 className="text-sm sm:text-base font-semibold text-white group-hover:text-white transition-colors line-clamp-1">
-                    {nextProject.title}
-                  </h4>
-                </button>
-              ) : (
-                <div className="flex-1 hidden sm:block" />
-              )}
-            </div>
-          )}
+                {/* Next Project Card */}
+                {nextProject ? (
+                  <button
+                    onClick={() => {
+                      const nextIdx = currentIndex + 1;
+                      navigate(`/project/${nextProject.notionPageId}`, {
+                        state: {
+                          bgClass: BG_CLASSES[nextIdx % BG_CLASSES.length],
+                          bgGradient: BG_GRADIENTS[nextIdx],
+                          coverImage: COVER_IMAGES[nextIdx] ?? COVER_IMAGES[0],
+                        },
+                      });
+                    }}
+                    className="flex-1 flex flex-col gap-1.5 items-end p-4 sm:p-5 rounded-xl bg-transparent border border-white/[0.08] hover:border-white/20 hover:bg-white/[0.04] transition-all text-right group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-white/40 font-medium group-hover:text-white/70 transition-colors">
+                      <span>Next Project</span>
+                      <svg className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="m9 18 6-6-6-6" />
+                      </svg>
+                    </div>
+                    <h4 className="text-sm sm:text-base font-semibold text-white group-hover:text-white transition-colors line-clamp-1">
+                      {nextProject.title}
+                    </h4>
+                  </button>
+                ) : (
+                  <div className="flex-1 hidden sm:block" />
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

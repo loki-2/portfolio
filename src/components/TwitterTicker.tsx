@@ -191,7 +191,7 @@ export function TwitterTickerSection({
   const list2 = [...row2, ...row2, ...row2, ...row2];
 
   return (
-    <div className="w-full mt-6 rounded-[12px] bg-[#131313] py-10 overflow-hidden flex flex-col gap-6">
+    <div className="w-full mt-6 rounded-[12px] border border-white/[0.08] bg-transparent py-10 overflow-hidden flex flex-col gap-6">
       {/* Section title */}
       <div className="px-6 lg:px-10 flex items-center justify-between">
         <h3 className="text-xl sm:text-2xl font-semibold text-white tracking-tight">

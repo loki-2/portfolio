@@ -176,8 +176,8 @@ export function HomePage() {
                 ? { duration: 0.65, ease: [0.16, 1, 0.3, 1] }
                 : {
                   delay: 2.0,
-                  duration: 1.2,
-                  times: [0, 0.15, 0.65, 1],
+                  duration: 2.0,
+                  times: [0, 0.20, 0.80, 1],
                   ease: ['easeOut', [0.05, 0.9, 0.1, 1], 'easeOut'] as any,
                 }
             }
