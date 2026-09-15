@@ -16,9 +16,11 @@ export function HomePage() {
   const headingExitRef = useRef({ x: 0, y: 0, scale: 1 });
 
   useEffect(() => {
-    // Stage 1: Center intro sequence (0 -> 3300ms)
+    // Stage 1: Center intro sequence (0 -> 2700ms)
+    // 0ms -> 1500ms: Avatar drops, 2nd bounce, expands
     // 1500ms: Heading emerges (delay: 1.5s)
-    // 1500ms + 1800ms = 3300ms: Heading animation finishes settling
+    // 1740ms -> 2340ms: Letter-spacing shrinks fast-first then decelerates smoothly
+    // 2700ms: Heading finishes settling, immediately move to sidebar
     const tMove = setTimeout(() => {
       if (introAvatarRef.current && introHeadingRef.current && sidebarRef.current) {
         const sidebarAvatarEl = sidebarRef.current.getAvatarEl();
@@ -58,17 +60,17 @@ export function HomePage() {
       }
 
       setPhase('moving');
-    }, 3300);
+    }, 2700);
 
-    // Stage 2: Arrive & settle at sidebar target (3300 + 650 = 3950ms)
+    // Stage 2: Arrive & settle at sidebar target (2700 + 650 = 3350ms)
     const tSettle = setTimeout(() => {
       setPhase('settled');
-    }, 3950);
+    }, 3350);
 
-    // Stage 3: Clean up overlay DOM (3950 + 600 = 4550ms)
+    // Stage 3: Clean up overlay DOM (3350 + 600 = 3950ms)
     const tDone = setTimeout(() => {
       setPhase('done');
-    }, 4550);
+    }, 3950);
 
     return () => {
       clearTimeout(tMove);
@@ -174,9 +176,9 @@ export function HomePage() {
                 ? { duration: 0.65, ease: [0.16, 1, 0.3, 1] }
                 : {
                   delay: 1.5,
-                  duration: 1.8,
-                  times: [0, 0.25, 0.85, 1],
-                  ease: ['easeOut', [0.16, 1, 0.3, 1], 'easeOut'] as any,
+                  duration: 1.2,
+                  times: [0, 0.2, 0.7, 1],
+                  ease: ['easeOut', [0.05, 0.9, 0.1, 1], 'easeOut'] as any,
                 }
             }
             className="text-3xl lg:text-4xl font-semibold text-white tracking-tight leading-[1.15] text-center inline-block"
