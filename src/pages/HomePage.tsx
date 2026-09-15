@@ -4,7 +4,7 @@ import { Sidebar, type SidebarHandle } from '@/components/Sidebar';
 import { ContentArea } from '@/components/ContentArea';
 
 export function HomePage() {
-  const [phase, setPhase] = useState<'intro' | 'rolling' | 'moving' | 'settled' | 'done'>('intro');
+  const [phase, setPhase] = useState<'intro' | 'moving' | 'settled' | 'done'>('intro');
   const [activeSection, setActiveSection] = useState<string>('work');
   const contentRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<SidebarHandle>(null);
@@ -12,31 +12,12 @@ export function HomePage() {
   const introAvatarRef = useRef<HTMLDivElement>(null);
   const introHeadingRef = useRef<HTMLHeadingElement>(null);
 
-  const rollPosRef = useRef({ x: 0, y: 0 });
   const avatarExitRef = useRef({ x: 0, y: 0, scale: 1 });
   const headingExitRef = useRef({ x: 0, y: 0, scale: 1 });
 
   useEffect(() => {
     // Stage 1: Center intro sequence (0 -> 4400ms)
-    // Avatar drops, 2nd bounce, expands + heading emerges & tightens
-
-    // Stage 2: Avatar rolls left to sit directly to the left of "Hey!" (4400ms -> 5050ms)
-    const tRoll = setTimeout(() => {
-      const isDesktop = window.innerWidth >= 1024;
-      if (introHeadingRef.current) {
-        const headingRect = introHeadingRef.current.getBoundingClientRect();
-        // Shift left to sit beside the start of "Hey!"
-        const targetX = isDesktop
-          ? -(headingRect.width / 2 + 14)
-          : -(headingRect.width / 2 + 8);
-        rollPosRef.current = { x: targetX, y: isDesktop ? 12 : 8 };
-      } else {
-        rollPosRef.current = { x: isDesktop ? -175 : -120, y: 12 };
-      }
-      setPhase('rolling');
-    }, 4400);
-
-    // Stage 3: Measure targets & move both elements to sidebar (at 5050ms)
+    // Avatar drops, 2nd bounce, expands + heading emerges & tightens (delay: 2.0s, duration: 2.0s)
     const tMove = setTimeout(() => {
       if (introAvatarRef.current && introHeadingRef.current && sidebarRef.current) {
         const sidebarAvatarEl = sidebarRef.current.getAvatarEl();
@@ -52,8 +33,8 @@ export function HomePage() {
           const toY = rTarget.top + rTarget.height / 2;
 
           avatarExitRef.current = {
-            x: rollPosRef.current.x + (toX - fromX),
-            y: rollPosRef.current.y + (toY - fromY),
+            x: toX - fromX,
+            y: toY - fromY,
             scale: rTarget.width / rIntro.width,
           };
         }
@@ -76,20 +57,19 @@ export function HomePage() {
       }
 
       setPhase('moving');
-    }, 5050);
+    }, 4400);
 
-    // Stage 4: Arrive & settle at sidebar target (5050 + 650 = 5700ms)
+    // Stage 2: Arrive & settle at sidebar target (4400 + 650 = 5050ms)
     const tSettle = setTimeout(() => {
       setPhase('settled');
-    }, 5700);
+    }, 5050);
 
-    // Stage 5: Clean up overlay DOM (5700 + 600 = 6300ms)
+    // Stage 3: Clean up overlay DOM (5050 + 600 = 5650ms)
     const tDone = setTimeout(() => {
       setPhase('done');
-    }, 6300);
+    }, 5650);
 
     return () => {
-      clearTimeout(tRoll);
       clearTimeout(tMove);
       clearTimeout(tSettle);
       clearTimeout(tDone);
@@ -136,7 +116,7 @@ export function HomePage() {
           transition={{ duration: 0.6, ease: 'easeOut' }}
           className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center gap-7 pointer-events-none"
         >
-          {/* Avatar: shoots up -> falls -> 2nd bounce -> expands -> ROLLS LEFT to "Hey!" -> moves to sidebar */}
+          {/* Avatar: small ball shoots up -> falls -> 2nd bounce -> expands smoothly -> moves to sidebar */}
           <motion.div
             ref={introAvatarRef}
             initial={{ opacity: 0, y: 140, scale: 0.25 }}
@@ -146,30 +126,17 @@ export function HomePage() {
                   x: avatarExitRef.current.x,
                   y: avatarExitRef.current.y,
                   scale: avatarExitRef.current.scale,
-                  rotate: -360,
-                  opacity: 1,
-                }
-                : phase === 'rolling'
-                ? {
-                  x: rollPosRef.current.x,
-                  y: rollPosRef.current.y,
-                  rotate: -360,
-                  scale: 1,
                   opacity: 1,
                 }
                 : {
                   opacity: [0, 1, 1, 1, 1, 1],
                   y: [140, -110, 0, -26, 0, 0],
                   scale: [0.25, 0.25, 0.25, 0.25, 0.25, 1],
-                  rotate: 0,
-                  x: 0,
                 }
             }
             transition={
               phase === 'moving' || phase === 'settled'
                 ? { duration: 0.65, ease: [0.16, 1, 0.3, 1] }
-                : phase === 'rolling'
-                ? { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
                 : {
                   duration: 2,
                   times: [0, 0.24, 0.44, 0.58, 0.8, 1],
@@ -184,7 +151,7 @@ export function HomePage() {
           {/* Heading */}
           <motion.h1
             ref={introHeadingRef}
-            initial={{ opacity: 0, letterSpacing: '0.2em', y: 12 }}
+            initial={{ opacity: 0, letterSpacing: '0.09em', y: 12 }}
             animate={
               phase === 'moving' || phase === 'settled'
                 ? {
@@ -197,9 +164,8 @@ export function HomePage() {
                 : {
                   opacity: [0, 1, 1, 1],
                   y: [12, 0, 0, 0],
-                  letterSpacing: ['0.2em', '0.2em', '-0.04em', '-0.025em'],
+                  letterSpacing: ['0.09em', '0.09em', '-0.04em', '-0.025em'],
                   scale: [1, 1, 1.02, 1],
-                  x: 0,
                 }
             }
             transition={
@@ -208,7 +174,7 @@ export function HomePage() {
                 : {
                   delay: 2.0,
                   duration: 2.0,
-                  times: [0, 0.55, 0.85, 1],
+                  times: [0, 0.25, 0.85, 1],
                   ease: ['easeOut', [0.16, 1, 0.3, 1], 'easeOut'] as any,
                 }
             }
