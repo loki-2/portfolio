@@ -31,7 +31,7 @@ export function SplashIntro({ onComplete }: SplashIntroProps) {
     }, 2600);
 
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (gone) return null;
@@ -51,12 +51,12 @@ export function SplashIntro({ onComplete }: SplashIntroProps) {
         initial={{ opacity: 0, y: -100, scale: 0.25 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.75, ease: 'easeOut' }}
-        className="w-20 h-20 rounded-full overflow-hidden ring-2 ring-white/25 shadow-2xl"
+        className="w-20 h-20 rounded-full overflow-hidden border-[2px] border-white/6 ring-2 ring-white/6 bg-white/8 shadow-2xl"
       >
         <img
-          src="/avatar.png"
+          src="/avatar1.png"
           alt="Abhishek"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover object-top scale-105"
         />
       </motion.div>
 

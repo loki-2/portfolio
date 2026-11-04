@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import type { NotionBlock, NotionRichText, ProjectSection } from '@/lib/types';
 
 // ─── Rich-text renderer ───────────────────────────────────────────────────────
@@ -221,11 +222,12 @@ function BlockRenderer({ block }: { block: NotionBlock }) {
       if (isTwitterEmbed) {
         return (
           <figure className="my-8 mx-auto w-full max-w-lg flex flex-col items-center">
-            <div className="w-full h-[220px] rounded-xl overflow-hidden bg-[#161616] border border-white/10 shadow-2xl">
+            <div className="w-full h-[220px] rounded-xl overflow-hidden bg-black border border-white/10 shadow-2xl">
               <iframe
                 src={embedUrl}
                 title="Embedded Tweet"
-                className="w-full h-full border-0"
+                className="w-full h-full border-0 bg-black"
+                style={{ filter: 'contrast(135%) brightness(72%)' }}
                 scrolling="no"
               />
             </div>
@@ -309,19 +311,24 @@ function renderBlocksGrouped(blocks: NotionBlock[]): React.ReactNode[] {
 // ─── Section renderer (used by ProjectPage) ───────────────────────────────────
 export function SectionContent({ section, isFirst }: { section: ProjectSection; isFirst: boolean }) {
   return (
-    <div
+    <motion.div
       id={`section-${section.title.toLowerCase().replace(/\s+/g, '-')}`}
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.55, ease: [0.21, 0.47, 0.32, 0.98] }}
       className={`w-full ${isFirst ? 'mt-4 lg:mt-6' : 'mt-4 lg:mt-6'}`}
     >
       <div
-        className="w-full px-4 lg:px-6 py-8 lg:py-12 border border-white/[0.08] rounded-xl bg-transparent"
+        className="w-full px-4 lg:px-6 py-8 lg:py-12"
+        style={{ background: '#111214', borderRadius: 12 }}
       >
         <div className="w-full flex flex-col gap-4">
           <h2 className={`text-2xl lg:text-3xl font-semibold text-white tracking-tight ${TEXT_WRAPPER}`}>{section.title}</h2>
           <div>{renderBlocksGrouped(section.blocks)}</div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

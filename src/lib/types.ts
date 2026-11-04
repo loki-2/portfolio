@@ -49,8 +49,10 @@ export interface WorkItem {
   title: string;
   description: string;
   tags: string[];
-  bgClass: string;
+  bgClass?: string;
   bgGradient?: string;    // optional inline gradient override (e.g. for specific cards)
   coverImage?: string;    // URL to cover image shown on the right of the card
+  carouselImages?: string[]; // Array of image URLs for rolling card carousel
+  carouselBg?: string;    // Configurable background for carousel card divs, defaults to 'bg-white'
   notionPageId: string;   // Notion page ID (without dashes) — used for routing
 }

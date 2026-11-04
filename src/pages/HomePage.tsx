@@ -2,12 +2,24 @@ import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Sidebar, type SidebarHandle } from '@/components/Sidebar';
 import { ContentArea } from '@/components/ContentArea';
+import { useSmoothScroll } from '@/lib/useSmoothScroll';
 
 export function HomePage() {
-  const [phase, setPhase] = useState<'intro' | 'moving' | 'settled' | 'done'>('intro');
+  const hasSeenIntroRef = useRef<boolean>(
+    typeof window !== 'undefined' &&
+    sessionStorage.getItem('hasSeenIntro') === 'true' &&
+    !new URLSearchParams(window.location.search).has('intro')
+  );
+  const hasSeenIntro = hasSeenIntroRef.current;
+
+  const [phase, setPhase] = useState<'intro' | 'moving' | 'settled' | 'done'>(
+    hasSeenIntro ? 'done' : 'intro'
+  );
   const [activeSection, setActiveSection] = useState<string>('work');
   const contentRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<SidebarHandle>(null);
+
+  const { scrollTo } = useSmoothScroll({ wrapperRef: contentRef });
 
   const introAvatarRef = useRef<HTMLDivElement>(null);
   const introHeadingRef = useRef<HTMLHeadingElement>(null);
@@ -16,11 +28,9 @@ export function HomePage() {
   const headingExitRef = useRef({ x: 0, y: 0, scale: 1 });
 
   useEffect(() => {
+    if (hasSeenIntro) return;
+
     // Stage 1: Center intro sequence (0 -> 3200ms)
-    // 0ms -> 2000ms: Avatar drops, 2nd bounce, and fully expands to 1.0 scale
-    // 2000ms: Heading emerges AFTER avatar expands full (delay: 2.0s)
-    // 2180ms -> 2780ms: Letter-spacing shrinks fast-first then decelerates smoothly
-    // 3200ms: Heading finishes settling, immediately move to sidebar
     const tMove = setTimeout(() => {
       if (introAvatarRef.current && introHeadingRef.current && sidebarRef.current) {
         const sidebarAvatarEl = sidebarRef.current.getAvatarEl();
@@ -67,17 +77,19 @@ export function HomePage() {
       setPhase('settled');
     }, 3850);
 
-    // Stage 3: Clean up overlay DOM (3850 + 600 = 4450ms)
+    // Stage 3: Clean up overlay DOM (3850 + 1350 = 5200ms)
     const tDone = setTimeout(() => {
       setPhase('done');
-    }, 4450);
+      sessionStorage.setItem('hasSeenIntro', 'true');
+    }, 5200);
 
     return () => {
       clearTimeout(tMove);
       clearTimeout(tSettle);
       clearTimeout(tDone);
+      sessionStorage.setItem('hasSeenIntro', 'true');
     };
-  }, []);
+  }, [hasSeenIntro]);
 
   // Scroll section tracking
   useEffect(() => {
@@ -101,7 +113,7 @@ export function HomePage() {
   const scrollToSection = (sectionId: string) => {
     const el = contentRef.current?.querySelector(`#${sectionId}`);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      scrollTo(el as HTMLElement);
       setActiveSection(sectionId);
     }
   };
@@ -110,14 +122,14 @@ export function HomePage() {
   const isSettled = phase === 'settled' || phase === 'done';
 
   return (
-    <div className="bg-background text-foreground antialiased">
+    <div className="bg-transparent text-foreground antialiased">
 
       {/* ── INTRO OVERLAY ────────────────────────────────────────────────────── */}
       {phase !== 'done' && (
         <motion.div
           animate={{ opacity: phase === 'settled' ? 0 : 1 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center gap-7 pointer-events-none"
+          transition={{ duration: 0.05, ease: 'easeOut' }}
+          className="fixed inset-0 z-50 bg-transparent flex flex-col items-center justify-center gap-7 pointer-events-none"
         >
           {/* Avatar: small ball shoots up -> falls -> 2nd bounce -> expands smoothly -> moves to sidebar */}
           <motion.div
@@ -146,9 +158,9 @@ export function HomePage() {
                   ease: ['easeOut', 'easeIn', 'easeOut', 'easeIn', [0.34, 1.3, 0.64, 1]] as any,
                 }
             }
-            className="w-[64px] h-[64px] rounded-full overflow-hidden ring-2 ring-white/25 shadow-[0_8px_50px_rgba(255,255,255,0.10)]"
+            className="w-[64px] h-[64px] rounded-full overflow-hidden shadow-[0_8px_50px_rgba(255,255,255,0.10)] border-[2px] border-white/6 ring-2 ring-white/6 bg-white/8"
           >
-            <img src="/avatar.png" alt="Abhishek" className="w-full h-full object-cover" />
+            <img src="/avatar1.png" alt="Abhishek" className="w-full h-full object-cover object-top scale-105" />
           </motion.div>
 
           {/* Heading */}
@@ -199,12 +211,15 @@ export function HomePage() {
           scrollToSection={scrollToSection}
           showSecondary={showSecondary}
           isSettled={isSettled}
+          phase={phase}
         />
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: showSecondary ? 1 : 0, y: showSecondary ? 0 : 16 }}
-          transition={{ duration: 0.6, ease: 'easeOut', delay: 0.15 }}
-          className="flex-1"
+          transition={hasSeenIntro
+            ? { duration: 0 }
+            : { duration: 0.6, ease: 'easeOut', delay: 0.15 }}
+          className="flex-1 min-w-0"
         >
           <ContentArea />
         </motion.div>

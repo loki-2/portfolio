@@ -37,28 +37,52 @@ function rowToProject(row: ProjectRow): NotionProject {
   };
 }
 
-// ─── Public helpers ───────────────────────────────────────────────────────────
+let memoryProjectsCache: NotionProject[] | null = null;
 
 /**
  * Fetches ALL projects from Supabase (used on the homepage).
- * This is the primary data source in production so we never need a Notion proxy.
+ * Selects only metadata — NOT blocks — to keep the payload small and fast.
+ * Blocks are only fetched on demand by getCachedProject.
  */
 export async function getAllProjectsFromCache(): Promise<NotionProject[]> {
+  if (memoryProjectsCache && memoryProjectsCache.length > 0) {
+    return memoryProjectsCache;
+  }
+
   const { data, error } = await supabase
     .from('projects')
-    .select('*')
+    // Exclude heavy `blocks` column — we only need list metadata here
+    .select('notion_page_id, title, subtext, role, team, duration, methods, tags, updated_at')
     .order('updated_at', { ascending: false });
 
-  if (error) throw new Error(`Supabase fetch failed: ${error.message}`);
-  return (data ?? []).map((row) => rowToProject(row as ProjectRow));
+  if (error) {
+    if (memoryProjectsCache) return memoryProjectsCache;
+    throw new Error(`Supabase fetch failed: ${error.message}`);
+  }
+
+  memoryProjectsCache = (data ?? []).map((row) => rowToProject(row as ProjectRow));
+  return memoryProjectsCache;
 }
 
 /**
- * Returns the cached project if it exists and is still fresh (< 1 h old).
- * Returns null if missing or stale so the caller can re-fetch from Notion.
+ * Returns the cached project (with blocks) for a given page ID.
+ * Fast path: if the in-memory cache already has blocks for this project, return immediately.
+ * Otherwise fetch the full row (including blocks) from Supabase and cache it.
  */
 export async function getCachedProject(notionPageId: string): Promise<NotionProject | null> {
+  const cleanTarget = notionPageId.replace(/-/g, '');
+
+  // Fast path: in memory AND has blocks already
+  if (memoryProjectsCache) {
+    const hit = memoryProjectsCache.find(
+      (p) => p.notionPageId.replace(/-/g, '') === cleanTarget
+    );
+    // Only return the hit if blocks have been fetched (non-empty array)
+    if (hit && hit.blocks && hit.blocks.length > 0) return hit;
+  }
+
   try {
+    // Fetch the full row including blocks for this single project
     const { data, error } = await supabase
       .from('projects')
       .select('*')
@@ -67,7 +91,21 @@ export async function getCachedProject(notionPageId: string): Promise<NotionProj
 
     if (error || !data) return null;
 
-    return rowToProject(data as ProjectRow);
+    const project = rowToProject(data as ProjectRow);
+
+    // Merge blocks back into the memory cache so future navigations are instant
+    if (memoryProjectsCache) {
+      const idx = memoryProjectsCache.findIndex(
+        (p) => p.notionPageId.replace(/-/g, '') === cleanTarget
+      );
+      if (idx >= 0) {
+        memoryProjectsCache[idx] = project;
+      } else {
+        memoryProjectsCache.push(project);
+      }
+    }
+
+    return project;
   } catch {
     return null;   // table may not exist yet — fail gracefully
   }
@@ -78,6 +116,15 @@ export async function getCachedProject(notionPageId: string): Promise<NotionProj
  * Call this after fetching fresh data from Notion.
  */
 export async function upsertProject(project: NotionProject): Promise<void> {
+  if (memoryProjectsCache) {
+    const idx = memoryProjectsCache.findIndex((p) => p.notionPageId === project.notionPageId);
+    if (idx >= 0) {
+      memoryProjectsCache[idx] = project;
+    } else {
+      memoryProjectsCache.push(project);
+    }
+  }
+
   const { error } = await supabase.from('projects').upsert(
     {
       notion_page_id: project.notionPageId,

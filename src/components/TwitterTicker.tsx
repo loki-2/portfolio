@@ -1,4 +1,6 @@
 
+import { motion } from 'framer-motion';
+
 export interface TweetItem {
   id: string;
   embedUrl?: string; // Can be a platform.twitter.com embed link or x.com status link
@@ -14,42 +16,30 @@ export const DUMMY_TWEETS_ROW1: TweetItem[] = [
   {
     id: '1',
     embedUrl: 'https://x.com/thenarrator/status/2059321822949109989?s=20',
-    url: 'https://x.com/sarah_edo/status/1812345678901234567',
-    name: 'Sarah Drasner',
-    handle: 'sarah_edo',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80',
-    text: 'Loved reading this deep dive into discovery-first UI architecture. Incredible attention to detail! 🚀',
-    date: 'Jul 18, 2026',
+    url: 'https://x.com/thenarrator/status/2059321822949109989',
+    name: 'The Narrator',
+    handle: 'thenarrator',
   },
   {
     id: '2',
     embedUrl: 'https://x.com/Web3_CryptoGen/status/2059466792322380145?s=20',
-    url: 'https://x.com/rauchg/status/1812345678901234568',
-    name: 'Guillermo Rauch',
-    handle: 'rauchg',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80/&theme=dark',
-    text: 'Great product design starts with understanding user intent. This case study demonstrates that so clearly.',
-    date: 'Jul 17, 2026',
+    url: 'https://x.com/Web3_CryptoGen/status/2059466792322380145',
+    name: 'Web3 CryptoGen',
+    handle: 'Web3_CryptoGen',
   },
   {
     id: '3',
     embedUrl: 'https://x.com/LitCollective_/status/2059271880989696063?s=20',
-    url: 'https://x.com/dan_abramov/status/1812345678901234569',
-    name: 'Dan Abramov',
-    handle: 'dan_abramov',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80',
-    text: 'Extremely smooth transitions and very clean UX patterns. Worth a read!',
-    date: 'Jul 16, 2026',
+    url: 'https://x.com/LitCollective_/status/2059271880989696063',
+    name: 'Lit Collective',
+    handle: 'LitCollective_',
   },
   {
     id: '4',
     embedUrl: 'https://x.com/bigse7en02/status/2059296196695343215?s=20',
-    url: 'https://x.com/emilkowalski_/status/1812345678901234570',
-    name: 'Emil Kowalski',
-    handle: 'emilkowalski_',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80',
-    text: 'The micro-interactions and smooth video showcases here are top tier craft. 👏',
-    date: 'Jul 15, 2026',
+    url: 'https://x.com/bigse7en02/status/2059296196695343215',
+    name: 'Big Se7en',
+    handle: 'bigse7en02',
   },
 ];
 
@@ -57,42 +47,30 @@ export const DUMMY_TWEETS_ROW2: TweetItem[] = [
   {
     id: '5',
     embedUrl: 'https://x.com/OPD_01/status/2059276204847353861?s=20',
-    url: 'https://x.com/raunofreiberg/status/1812345678901234571',
-    name: 'Rauno Freiberg',
-    handle: 'raunofreiberg',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&auto=format&fit=crop&q=80',
-    text: 'High quality work! The layout grid and dark mode aesthetics feel super polished.',
-    date: 'Jul 15, 2026',
+    url: 'https://x.com/OPD_01/status/2059276204847353861',
+    name: 'OPD',
+    handle: 'OPD_01',
   },
   {
     id: '6',
     embedUrl: 'https://x.com/0xForecaster/status/2059274551834403005?s=20',
-    url: 'https://x.com/LinusEkenstam/status/1812345678901234572',
-    name: 'Linus Ekenstam',
-    handle: 'LinusEkenstam',
-    avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&auto=format&fit=crop&q=80',
-    text: 'Super inspiring case study. Bookmark this if you build web apps or design systems.',
-    date: 'Jul 14, 2026',
+    url: 'https://x.com/0xForecaster/status/2059274551834403005',
+    name: '0xForecaster',
+    handle: '0xForecaster',
   },
   {
     id: '7',
     embedUrl: 'https://x.com/Mapemaofweb3/status/2059374618327085189?s=20',
-    url: 'https://x.com/pacocoursey/status/1812345678901234573',
-    name: 'Paco Coursey',
-    handle: 'pacocoursey',
-    avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=100&auto=format&fit=crop&q=80',
-    text: 'The typography choices and dark background contrasts are spot on.',
-    date: 'Jul 13, 2026',
+    url: 'https://x.com/Mapemaofweb3/status/2059374618327085189',
+    name: 'Mapema Web3',
+    handle: 'Mapemaofweb3',
   },
   {
     id: '8',
     embedUrl: 'https://x.com/SportsOrbitX/status/2059308031167656150?s=20',
-    url: 'https://x.com/maggieappleton/status/1812345678901234574',
-    name: 'Maggie Appleton',
-    handle: 'maggieappleton',
-    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80',
-    text: 'Thoughtful visual explanations and clear breakdown of complex product problems.',
-    date: 'Jul 12, 2026',
+    url: 'https://x.com/SportsOrbitX/status/2059308031167656150',
+    name: 'Sports Orbit X',
+    handle: 'SportsOrbitX',
   },
 ];
 
@@ -117,7 +95,6 @@ function getTwitterEmbedSrc(tweet: TweetItem): string | null {
 function TweetCard({ tweet }: { tweet: TweetItem }) {
   const embedSrc = getTwitterEmbedSrc(tweet);
 
-  // If a direct iframe embedUrl or Twitter status link is present, render iframe embed
   if (embedSrc) {
     return (
       <div className="w-[280px] sm:w-[330px] h-[200px] shrink-0 bg-black rounded-lg overflow-hidden shadow-lg transition-all">
@@ -137,7 +114,7 @@ function TweetCard({ tweet }: { tweet: TweetItem }) {
       href={tweet.url || '#'}
       target="_blank"
       rel="noopener noreferrer"
-      className="w-[320px] sm:w-[360px] shrink-0 bg-[#161616] hover:bg-[#1c1c1c] border border-white/[0.08] hover:border-white/20 rounded-xl p-5 flex flex-col justify-between gap-3 transition-all duration-200 group no-underline text-left"
+      className="w-[320px] sm:w-[360px] shrink-0 bg-[#18191c] hover:bg-[#202227] border border-white/[0.08] hover:border-white/20 rounded-xl p-5 flex flex-col justify-between gap-3 transition-all duration-200 group no-underline text-left"
     >
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
@@ -177,6 +154,7 @@ function TweetCard({ tweet }: { tweet: TweetItem }) {
   );
 }
 
+
 export function TwitterTickerSection({
   title = 'And they loved it!',
   row1 = DUMMY_TWEETS_ROW1,
@@ -191,7 +169,13 @@ export function TwitterTickerSection({
   const list2 = [...row2, ...row2, ...row2, ...row2];
 
   return (
-    <div className="w-full mt-6 rounded-[12px] border border-white/[0.08] bg-transparent py-10 overflow-hidden flex flex-col gap-6">
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.55, ease: [0.21, 0.47, 0.32, 0.98] }}
+      className="w-full mt-6 rounded-[12px] bg-[#111214] py-10 overflow-hidden flex flex-col gap-6"
+    >
       {/* Section title */}
       <div className="px-6 lg:px-10 flex items-center justify-between">
         <h3 className="text-xl sm:text-2xl font-semibold text-white tracking-tight">
@@ -203,25 +187,21 @@ export function TwitterTickerSection({
       </div>
 
       {/* Ticker rows container */}
-      <div className="flex flex-col gap-4 relative overflow-hidden">
-        {/* Subtle left & right gradient fade overlays */}
-        <div className="absolute top-0 bottom-0 left-0 w-12 bg-gradient-to-r from-[#131313] to-transparent z-10 pointer-events-none" />
-        <div className="absolute top-0 bottom-0 right-0 w-12 bg-gradient-to-l from-[#131313] to-transparent z-10 pointer-events-none" />
-
-        {/* Row 1: moves left */}
-        <div className="overflow-hidden flex">
-          <div className="animate-marquee-left flex gap-4">
-            {list1.map((tweet, idx) => (
-              <TweetCard key={`r1-${tweet.id}-${idx}`} tweet={tweet} />
+      <div className="flex flex-col gap-4">
+        {/* Row 1: Leftward continuous ticker */}
+        <div className="flex overflow-hidden group">
+          <div className="animate-marquee-left flex gap-4 pr-4 shrink-0">
+            {list1.map((t, idx) => (
+              <TweetCard key={`r1-${t.id}-${idx}`} tweet={t} />
             ))}
           </div>
         </div>
 
-        {/* Row 2: moves right */}
-        <div className="overflow-hidden flex">
-          <div className="animate-marquee-right flex gap-4">
-            {list2.map((tweet, idx) => (
-              <TweetCard key={`r2-${tweet.id}-${idx}`} tweet={tweet} />
+        {/* Row 2: Rightward continuous ticker */}
+        <div className="flex overflow-hidden group">
+          <div className="animate-marquee-right flex gap-4 pr-4 shrink-0">
+            {list2.map((t, idx) => (
+              <TweetCard key={`r2-${t.id}-${idx}`} tweet={t} />
             ))}
           </div>
         </div>
@@ -237,6 +217,6 @@ export function TwitterTickerSection({
           />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

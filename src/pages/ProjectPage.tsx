@@ -1,198 +1,177 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import { Badge } from '@/components/ui/badge';
+import { motion } from 'framer-motion';
+import { ArrowLeft } from 'lucide-react';
+import { ProjectTags } from '@/components/ProjectTag';
 import { getCachedProject, upsertProject, getAllProjectsFromCache } from '@/lib/supabase';
 import { getProjectWithBlocks } from '@/lib/notion';
 import { SectionContent, groupBlocksIntoSections } from '@/components/NotionRenderer';
 import type { NotionProject, ProjectSection } from '@/lib/types';
 import { TwitterTickerSection } from '@/components/TwitterTicker';
-
-// ─── Skeleton loader ──────────────────────────────────────────────────────────
-function Skeleton({ className = '', style }: { className?: string; style?: React.CSSProperties }) {
-  return <div className={`animate-pulse bg-white/[0.07] rounded-lg ${className}`} style={style} />;
-}
-
-function SidebarSkeleton() {
-  return (
-    <div className="flex flex-col gap-5 p-10 w-full">
-      <Skeleton className="w-8 h-8 rounded-full" />
-      <Skeleton className="h-4 w-16" />
-      <Skeleton className="h-8 w-3/4" />
-      <Skeleton className="h-8 w-2/3" />
-      <Skeleton className="h-16 w-full" />
-      <div className="flex gap-2">
-        <Skeleton className="h-5 w-16 rounded-full" />
-        <Skeleton className="h-5 w-20 rounded-full" />
-      </div>
-    </div>
-  );
-}
-
-// Matches the palette in ContentArea so banner bg == card bg
-const BANNER_BG_CLASSES = [
-  '#1a3a1a', '#0f2535', '#1a1a2e', '#2a1a1a', '#251a2e', '#1a2520',
-];
-const BANNER_GRADIENTS: Record<number, string> = {
-  2: 'radial-gradient(ellipse at center, #1685C5 0%, #105C89 100%)',
-};
-function cardIndexFromId(id: string): number {
-  const hash = id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-  return hash % BANNER_BG_CLASSES.length;
-}
+import {
+  PROJECT_ORDER,
+  COVER_IMAGES,
+  getCoverImageForProject,
+  getProjectIndex,
+  getCleanPageId,
+} from '@/lib/projects';
+import { useSmoothScroll } from '@/lib/useSmoothScroll';
 
 // ─── Hero banner ──────────────────────────────────────────────────────────────
 function HeroBanner({
-  bgClass,
-  bgGradient,
   coverImage,
-  notionPageId
+  notionPageId,
 }: {
-  bgClass?: string;
-  bgGradient?: string;
   coverImage?: string;
   notionPageId: string;
+  index?: number;
 }) {
-  // Fallback to deterministic colour if no state was passed (e.g. deep link)
-  const fallbackIdx = cardIndexFromId(notionPageId);
-  const fallbackBg = BANNER_GRADIENTS[fallbackIdx] ?? `radial-gradient(ellipse at 60% 50%, ${BANNER_BG_CLASSES[fallbackIdx]} 0%, #0a0a0a 80%)`;
-
-  const inlineStyle = bgGradient ? { background: bgGradient } : (!bgClass ? { background: fallbackBg } : {});
-  const containerClass = `w-full rounded-xl overflow-hidden relative flex flex-col justify-end items-center ${bgClass || ''}`;
+  const cleanId = notionPageId ? notionPageId.replace(/-/g, '') : '';
 
   return (
-    <div className={containerClass} style={{ minHeight: 200, ...inlineStyle }}>
-      {/* Cover image area — full width at bottom with 0 bottom padding */}
+    <motion.div
+      layoutId={`card-${cleanId}`}
+      className="w-full rounded-xl overflow-hidden relative flex flex-col justify-end items-center"
+      style={{ minHeight: 200, backgroundColor: '#111214' }}
+      transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
+    >
+      {/* Cover image */}
       {coverImage && (
-        <div className="w-full pt-6 sm:pt-8 lg:pt-10 px-4 sm:px-6 lg:px-10 flex items-end justify-center">
-          <img
+        <div className="w-full pt-6 sm:pt-8 lg:pt-10 px-4 sm:px-6 lg:px-10 flex items-end justify-center relative">
+          <motion.img
+            layoutId={`card-image-${cleanId}`}
             src={coverImage}
             alt=""
-            className="w-full h-auto max-h-[380px] lg:max-h-[440px] object-cover object-left-top rounded-none z-[1] block -mb-2"
+            className="w-full h-auto max-h-[380px] lg:max-h-[440px] object-cover object-left-top rounded-none block -mb-2"
+            transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
           />
         </div>
       )}
+    </motion.div>
+  );
+}
+
+// ─── Content Section Loading Skeleton ──────────────────────────────────────────
+function SectionSkeleton() {
+  return (
+    <div className="flex flex-col gap-6 w-full animate-pulse mt-4">
+      {/* Overview Card Skeleton — 100% Solid Dark Backgrounds */}
+      <div className="bg-[#111214] rounded-2xl border border-white/[0.08] p-6 sm:p-8 flex flex-col gap-5">
+        <div className="h-6 bg-white/[0.08] rounded-md w-36" />
+        <div className="flex flex-col gap-3 pt-1">
+          <div className="h-3.5 bg-white/[0.05] rounded w-full" />
+          <div className="h-3.5 bg-white/[0.05] rounded w-[92%]" />
+          <div className="h-3.5 bg-white/[0.05] rounded w-[84%]" />
+          <div className="h-3.5 bg-white/[0.05] rounded w-[60%]" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+          <div className="h-20 bg-white/[0.04] rounded-xl border border-white/[0.08]" />
+          <div className="h-20 bg-white/[0.04] rounded-xl border border-white/[0.08]" />
+        </div>
+      </div>
+
+      {/* Detail Section Skeleton — 100% Solid Dark Backgrounds */}
+      <div className="bg-[#111214] rounded-2xl border border-white/[0.08] p-6 sm:p-8 flex flex-col gap-5">
+        <div className="h-6 bg-white/[0.08] rounded-md w-48" />
+        <div className="flex flex-col gap-3 pt-1">
+          <div className="h-3.5 bg-white/[0.05] rounded w-full" />
+          <div className="h-3.5 bg-white/[0.05] rounded w-[88%]" />
+          <div className="h-3.5 bg-white/[0.05] rounded w-[72%]" />
+        </div>
+        <div className="h-60 sm:h-72 bg-white/[0.04] rounded-xl border border-white/[0.08] w-full mt-2" />
+      </div>
     </div>
   );
 }
 
 // ─── Left sidebar ─────────────────────────────────────────────────────────────
 interface ProjectSidebarProps {
-  project: NotionProject;
+  project: NotionProject | null;
+  notionPageId: string;
+  // Optimistic state from navigation — shown immediately before project loads
+  optimisticTitle?: string;
+  optimisticTags?: string[];
+  optimisticDescription?: string;
   sections: ProjectSection[];
   activeSection: string;
   onNavClick: (id: string) => void;
 }
 
-function ProjectSidebar({ project }: ProjectSidebarProps) {
+function ProjectSidebar({ project, notionPageId, optimisticTitle, optimisticTags, optimisticDescription }: ProjectSidebarProps) {
   const navigate = useNavigate();
+  const cleanId = notionPageId ? notionPageId.replace(/-/g, '') : '';
+
+  const title = project?.title ?? optimisticTitle ?? '';
+  const tags = project?.tags ?? optimisticTags ?? [];
+  const subtext = project?.subtext ?? optimisticDescription ?? '';
+  const duration = project?.duration;
+  const team = project?.team;
 
   return (
-    <aside className="w-full lg:w-[400px] shrink-0 flex flex-col lg:h-screen lg:sticky top-0 lg:overflow-y-auto py-6 lg:py-10 px-5 lg:px-10 border-b lg:border-b-0 lg:border-r border-white/[0.06] bg-background z-10">
+    <aside className="w-full lg:w-[400px] shrink-0 flex flex-col lg:justify-between lg:h-screen lg:sticky top-0 lg:overflow-y-auto py-6 lg:py-10 px-5 lg:px-10 border-b lg:border-b-0 lg:border-r border-white/[0.06] bg-transparent z-10">
 
-      {/* Back button + title block — stays at the top */}
-      <div className="flex flex-col gap-5 lg:gap-8">
+      {/* TOP SECTION */}
+      <div className="flex flex-col gap-0">
+        {/* Back icon button (w-10 h-10 on mobile, w-14 h-14 on desktop — matches homepage profile size & styling) */}
         <button
           onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-white/40 hover:text-white/70 transition-colors text-sm w-fit group bg-white/10 rounded-full p-1 cursor-pointer"
+          title="Back to home"
+          aria-label="Back to home"
+          className="mb-6 w-10 h-10 lg:w-14 lg:h-14 rounded-full border border-white/10 lg:border-[2px] lg:border-white/6 bg-white/8 hover:bg-white/15 text-white/70 hover:text-white transition-all duration-300 flex items-center justify-center shrink-0 cursor-pointer group shadow-sm select-none"
         >
-          <svg className="w-6 h-6 group-hover:-translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m15 18-6-6 6-6" />
-          </svg>
+          <ArrowLeft className="w-4 h-4 lg:w-5 lg:h-5 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-x-1" strokeWidth={2.5} />
         </button>
 
-        {/* Project title block */}
-        <div className="flex flex-col gap-3 lg:gap-4">
-          <h1 className="text-2xl lg:text-[1.6rem] font-semibold text-white leading-snug tracking-tight">
-            {project.title}
-          </h1>
+        {/* Project heading — matches project card title font size */}
+        <div className="mt-0">
+          <motion.h1
+            layoutId={`card-title-${cleanId}`}
+            className="text-2xl lg:text-3xl font-semibold leading-tight tracking-tight text-white"
+            transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {title}
+          </motion.h1>
 
-          {project.subtext && (
-            <p className="text-sm lg:text-md text-white/60 leading-relaxed">{project.subtext}</p>
+          {/* Subtext — matches homepage subtext font, size, weight, color, leading, mt-4 */}
+          {subtext && (
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15, duration: 0.35, ease: 'easeOut' }}
+              className="text-base font-medium text-white/60 leading-relaxed max-w-sm mt-4"
+            >
+              {subtext}
+            </motion.p>
           )}
 
-          {/* Tags */}
-          {project.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {project.tags.map((tag) => (
-                <Badge
-                  key={tag}
-                  variant="outline"
-                  className="text-[10px] uppercase tracking-widest font-semibold border-white/20 text-white/50 rounded-full px-2.5 py-0.5 bg-transparent"
-                >
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          )}
+          {/* Tags — shared layoutId matches WorkCard tags div */}
+          <div className="mt-5 lg:mt-6">
+            <ProjectTags tags={tags} layoutId={`card-tags-${cleanId}`} />
+          </div>
         </div>
       </div>
 
-      {/* Section nav + meta — pinned to the bottom */}
-      <div className="mt-6 lg:mt-auto flex flex-col">
-        {/* Section nav (desktop only) — 32px above meta fields */}
-        {/* {sections.length > 0 && (
-          <nav className="hidden lg:flex flex-col gap-1 mb-8">
-            {sections.map((s) => {
-              const id = `section-${s.title.toLowerCase().replace(/\s+/g, '-')}`;
-              const isActive = activeSection === id;
-              return (
-                <button
-                  key={s.title}
-                  onClick={() => onNavClick(id)}
-                  className={`flex items-center gap-2.5 text-sm text-left w-fit py-0.5 transition-colors focus:outline-none ${isActive ? 'text-white' : 'text-white/30 hover:text-white/60'
-                    }`}
-                >
-                  {s.title}
-                  {isActive && <span className="w-1.5 h-1.5 rounded-full bg-white inline-block" />}
-                </button>
-              );
-            })}
-          </nav>
-        )} */}
-
-        {/* Meta fields */}
-        <div className="flex flex-col gap-3">
+      {/* Meta fields (Duration & Team) — 2 rows (label on top, value below) with increased gap */}
+      {project && (duration || team) && (
+        <div className="mt-8 lg:mt-auto pt-6 border-t border-white/[0.06] flex flex-col gap-6 lg:gap-7">
           {[
-            { label: 'Duration', value: project.duration },
-            // { label: 'Role', value: project.role },
-            { label: 'Team', value: project.team },
-            // { label: 'Methods', value: project.methods },
+            { label: 'Duration', value: duration },
+            { label: 'Team', value: team },
           ]
             .filter((m) => m.value)
             .map(({ label, value }) => (
-              <div key={label} className="flex items-baseline gap-3">
-                <span className="text-[11px] uppercase tracking-widest text-white/25 w-16 shrink-0">
+              <div key={label} className="flex flex-col gap-1.5">
+                <span className="text-[11px] uppercase tracking-wider font-semibold text-white/60">
                   {label}
                 </span>
-                <span className="text-sm text-white/60">{value}</span>
+                <span className="text-sm font-medium text-white/90 leading-snug">{value}</span>
               </div>
             ))}
         </div>
-      </div>
+      )}
     </aside>
   );
 }
-
-const COVER_IMAGES = [
-  '/cover_fintech.png',
-  '/cover_ai_chat.png',
-  '/cover_spotify.png',
-];
-
-const BG_CLASSES = [
-  'bg-[#1a3a1a]',
-  'bg-[#0f2535]',
-  'bg-[#1a1a2e]',
-  'bg-[#2a1a1a]',
-  'bg-[#251a2e]',
-  'bg-[#1a2520]',
-];
-
-const BG_GRADIENTS: Record<number, string> = {
-  0: 'radial-gradient(ellipse at center, #e7e734ff 0%, #86800bff 100%)',
-  1: 'radial-gradient(ellipse at center, #70d13cff 0%, #468226ff 100%)',
-  2: 'radial-gradient(ellipse at center, #1685C5 0%, #105C89 100%)',
-};
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export function ProjectPage() {
@@ -200,40 +179,40 @@ export function ProjectPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { state } = useLocation();
   const contentRef = useRef<HTMLDivElement>(null);
+  const { scrollTo, lenisRef } = useSmoothScroll({ wrapperRef: contentRef });
 
+  const normalizedPageId = getCleanPageId(pageId);
   const [project, setProject] = useState<NotionProject | null>(null);
   const [sections, setSections] = useState<ProjectSection[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState('');
-  const [isFirstProject, setIsFirstProject] = useState(false);
+  const [isFirstProject, setIsFirstProject] = useState(normalizedPageId === PROJECT_ORDER[0]);
   const [allProjects, setAllProjects] = useState<Omit<NotionProject, 'blocks' | 'updatedAt'>[]>([]);
+
+  useEffect(() => {
+    if (sections.length > 0) {
+      lenisRef.current?.resize();
+    }
+  }, [sections, lenisRef]);
 
   // Check if current page is the first project & fetch all projects for prev/next
   useEffect(() => {
     if (!pageId) return;
     getAllProjectsFromCache()
       .then((all) => {
-        // Sort by same fixed order used on homepage
-        const PROJECT_ORDER = [
-          '3804078ba2908056aeacdb709e4bffe7',
-          '3804078ba29080cfab17ff8f582002ba',
-          '3734078ba290801484dadc9ff0a8c51b',
-        ];
         const sorted = [...all].sort((a, b) => {
-          const ai = PROJECT_ORDER.indexOf(a.notionPageId);
-          const bi = PROJECT_ORDER.indexOf(b.notionPageId);
+          const ai = PROJECT_ORDER.indexOf(getCleanPageId(a.notionPageId));
+          const bi = PROJECT_ORDER.indexOf(getCleanPageId(b.notionPageId));
           return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
         });
         setAllProjects(sorted);
         if (sorted.length > 0) {
-          const currentId = pageId.replace(/-/g, '');
-          const firstId = sorted[0].notionPageId.replace(/-/g, '');
-          setIsFirstProject(currentId === firstId);
+          const firstId = getCleanPageId(sorted[0].notionPageId);
+          setIsFirstProject(normalizedPageId === firstId);
         }
       })
       .catch(() => { });
-  }, [pageId]);
+  }, [pageId, normalizedPageId]);
 
   // Reset scroll to top when page changes
   useEffect(() => {
@@ -249,8 +228,8 @@ export function ProjectPage() {
     if (!pageId) return;
 
     let cancelled = false;
-    setLoading(true);
     setError(null);
+    // Don't reset project — keep showing whatever we have (optimistic state)
 
     (async () => {
       try {
@@ -259,7 +238,6 @@ export function ProjectPage() {
         if (cached && !cancelled) {
           setProject(cached);
           setSections(groupBlocksIntoSections(cached.blocks));
-          setLoading(false);
 
           // If forceRefresh, also re-fetch from Notion in the background to update cache
           if (forceRefresh) {
@@ -269,11 +247,15 @@ export function ProjectPage() {
                   setProject(fresh);
                   setSections(groupBlocksIntoSections(fresh.blocks));
                 }
-                upsertProject(fresh).catch(() => {});
+                upsertProject(fresh).catch(() => { });
               })
-              .catch(() => {}) // silently ignore Notion errors if cache was shown
+              .catch(() => { }) // silently ignore Notion errors if cache was shown
               .finally(() => {
-                if (!cancelled) setSearchParams({}, { replace: true });
+                if (!cancelled && searchParams.has('refresh')) {
+                  const newParams = new URLSearchParams(searchParams);
+                  newParams.delete('refresh');
+                  setSearchParams(newParams, { replace: true, state });
+                }
               });
           }
           return;
@@ -284,15 +266,17 @@ export function ProjectPage() {
         if (!cancelled) {
           setProject(data);
           setSections(groupBlocksIntoSections(data.blocks));
-          setLoading(false);
-          setSearchParams({}, { replace: true });
+          if (searchParams.has('refresh')) {
+            const newParams = new URLSearchParams(searchParams);
+            newParams.delete('refresh');
+            setSearchParams(newParams, { replace: true, state });
+          }
         }
-        upsertProject(data).catch(() => {});
+        upsertProject(data).catch(() => { });
 
       } catch (err) {
         if (!cancelled) {
           setError((err as Error).message);
-          setLoading(false);
         }
       }
     })();
@@ -325,32 +309,29 @@ export function ProjectPage() {
   const scrollToSection = useCallback((id: string) => {
     const el = contentRef.current?.querySelector(`#${id}`);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      scrollTo(el as HTMLElement);
       setActiveSection(id);
     }
-  }, []);
+  }, [scrollTo]);
 
   const navigate = useNavigate();
 
   // Find index of current project for previous / next buttons & cover image resolution
-  const normalizedPageId = pageId ? pageId.replace(/-/g, '') : '';
   const currentIndex = allProjects.findIndex(
-    (p) => p.notionPageId.replace(/-/g, '') === normalizedPageId
+    (p) => getCleanPageId(p.notionPageId) === normalizedPageId
   );
-  const prevProject = currentIndex > 0 ? allProjects[currentIndex - 1] : null;
-  const nextProject =
-    currentIndex >= 0 && currentIndex < allProjects.length - 1
-      ? allProjects[currentIndex + 1]
-      : null;
 
-  const fallbackIdx = project ? cardIndexFromId(project.notionPageId) : 0;
-  const resolvedIdx = currentIndex >= 0 ? currentIndex : fallbackIdx;
-  const activeBgClass = state?.bgClass ?? BG_CLASSES[resolvedIdx % BG_CLASSES.length];
-  const activeBgGradient = state?.bgGradient ?? BG_GRADIENTS[resolvedIdx];
-  const activeCoverImage = state?.coverImage ?? COVER_IMAGES[resolvedIdx % COVER_IMAGES.length] ?? COVER_IMAGES[0];
+  const resolvedIdx = currentIndex >= 0 ? currentIndex : getProjectIndex(pageId);
+  // Deterministic cover image mapping based on project ID and order
+  const activeCoverImage =
+    getCoverImageForProject(pageId, resolvedIdx) ||
+    state?.coverImage ||
+    COVER_IMAGES[resolvedIdx % COVER_IMAGES.length] ||
+    COVER_IMAGES[0];
+  const activeIndex = state?.index ?? resolvedIdx;
 
   // ── Error state ────────────────────────────────────────────────────────────
-  if (error) {
+  if (error && !project) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-background gap-4">
         <p className="text-white/50 text-sm">Failed to load project: {error}</p>
@@ -364,127 +345,75 @@ export function ProjectPage() {
     );
   }
 
-  // ── Loading state ──────────────────────────────────────────────────────────
-  if (loading || !project) {
-    return (
-      <div className="flex flex-col lg:flex-row h-screen overflow-hidden bg-background">
-        <div className="w-full lg:w-[400px] border-r border-white/[0.06]">
-          <SidebarSkeleton />
-        </div>
-        <div className="flex-1 p-10 flex flex-col gap-5">
-          <Skeleton className="w-full rounded-2xl" style={{ height: 340 } as React.CSSProperties} />
-          <Skeleton className="h-5 w-1/3 mt-4" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-5/6" />
-          <Skeleton className="h-4 w-4/6" />
-        </div>
-      </div>
-    );
-  }
-
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen lg:h-screen lg:overflow-hidden bg-[#0D0D0D] text-foreground antialiased relative">
+    <div className="flex flex-col lg:flex-row min-h-screen lg:h-screen lg:overflow-hidden bg-transparent text-foreground antialiased relative">
       <ProjectSidebar
         project={project}
+        notionPageId={pageId!}
+        optimisticTitle={state?.title}
+        optimisticTags={state?.tags}
+        optimisticDescription={state?.description}
         sections={sections}
         activeSection={activeSection}
         onNavClick={scrollToSection}
       />
 
       {/* Scrollable right content */}
-      <div ref={contentRef} className="flex-1 lg:h-screen lg:overflow-y-auto pt-4 lg:pt-8 pb-6 lg:pb-8 relative">
-        {/* Background grid lines pattern */}
-        <div className="absolute inset-0 bg-grid-pattern pointer-events-none z-0" />
+      <div ref={contentRef} className="flex-1 lg:h-screen lg:overflow-y-auto">
+        <div className="min-h-full pt-4 lg:pt-8 pb-6 lg:pb-8 relative">
 
-        <div className="relative z-10">
-          {/* Hero banner — keeps its own horizontal padding */}
-          <div className="px-4 lg:px-4">
-            <HeroBanner
-              notionPageId={project.notionPageId}
-              bgClass={activeBgClass}
-              bgGradient={activeBgGradient}
-              coverImage={activeCoverImage}
-            />
-          </div>
 
-          {/* Notion content sections — 48px side margins */}
-          <div className="mt-1 px-4">
-            {sections.map((section, i) => (
-              <SectionContent key={section.title} section={section} isFirst={i === 0} />
-            ))}
+          <div className="relative z-10">
+            {/* Hero banner — keeps its own horizontal padding */}
+            <div className="px-4 lg:px-4">
+              <HeroBanner
+                coverImage={activeCoverImage}
+                notionPageId={pageId!}
+                index={activeIndex}
+              />
+            </div>
 
-            {/* Twitter / X posts 2-row continuous ticker — rendered ONLY for the first article */}
-            {isFirstProject && <TwitterTickerSection />}
+            {/* Notion content sections — crossfade skeleton → content without layout shift */}
+            <div className="mt-1 px-4 relative">
+              {/* Skeleton: fades out when sections load */}
+              {sections.length === 0 && !error && (
+                <motion.div
+                  key="skeleton"
+                  initial={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <SectionSkeleton />
+                </motion.div>
+              )}
 
-            {sections.length === 0 && (
-              <div className="flex items-center justify-center py-24">
-                <p className="text-sm text-white/80">No content found in this Notion page yet.</p>
-              </div>
-            )}
+              {/* Content: fades in when sections load */}
+              {sections.length > 0 && (
+                <motion.div
+                  key="loaded"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.35, ease: 'easeOut' }}
+                >
+                  {project && sections.map((section, i) => (
+                    <SectionContent key={section.title} section={section} isFirst={i === 0} />
+                  ))}
+                </motion.div>
+              )}
 
-            {/* Prev / Next Project Navigation Cards */}
-            {(prevProject || nextProject) && (
-              <div className="mt-8 sm:mt-14 mb-8 pt-6 sm:pt-8 border-t border-white/[0.08] flex flex-col sm:flex-row gap-4 justify-between items-stretch">
-                {/* Previous Project Card */}
-                {prevProject ? (
-                  <button
-                    onClick={() => {
-                      const prevIdx = currentIndex - 1;
-                      navigate(`/project/${prevProject.notionPageId}`, {
-                        state: {
-                          bgClass: BG_CLASSES[prevIdx % BG_CLASSES.length],
-                          bgGradient: BG_GRADIENTS[prevIdx],
-                          coverImage: COVER_IMAGES[prevIdx] ?? COVER_IMAGES[0],
-                        },
-                      });
-                    }}
-                    className="flex-1 flex flex-col gap-1.5 p-4 sm:p-5 rounded-xl bg-transparent border border-white/[0.08] hover:border-white/20 hover:bg-white/[0.04] transition-all text-left group cursor-pointer"
-                  >
-                    <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-white/40 font-medium group-hover:text-white/70 transition-colors">
-                      <svg className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="m15 18-6-6 6-6" />
-                      </svg>
-                      <span>Previous Project</span>
-                    </div>
-                    <h4 className="text-sm sm:text-base font-semibold text-white group-hover:text-white transition-colors line-clamp-1">
-                      {prevProject.title}
-                    </h4>
-                  </button>
-                ) : (
-                  <div className="flex-1 hidden sm:block" />
-                )}
+              {/* Twitter / X posts 2-row continuous ticker — rendered ONLY for the first article once loaded */}
+              {isFirstProject && sections.length > 0 && <TwitterTickerSection />}
 
-                {/* Next Project Card */}
-                {nextProject ? (
-                  <button
-                    onClick={() => {
-                      const nextIdx = currentIndex + 1;
-                      navigate(`/project/${nextProject.notionPageId}`, {
-                        state: {
-                          bgClass: BG_CLASSES[nextIdx % BG_CLASSES.length],
-                          bgGradient: BG_GRADIENTS[nextIdx],
-                          coverImage: COVER_IMAGES[nextIdx] ?? COVER_IMAGES[0],
-                        },
-                      });
-                    }}
-                    className="flex-1 flex flex-col gap-1.5 items-end p-4 sm:p-5 rounded-xl bg-transparent border border-white/[0.08] hover:border-white/20 hover:bg-white/[0.04] transition-all text-right group cursor-pointer"
-                  >
-                    <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-white/40 font-medium group-hover:text-white/70 transition-colors">
-                      <span>Next Project</span>
-                      <svg className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="m9 18 6-6-6-6" />
-                      </svg>
-                    </div>
-                    <h4 className="text-sm sm:text-base font-semibold text-white group-hover:text-white transition-colors line-clamp-1">
-                      {nextProject.title}
-                    </h4>
-                  </button>
-                ) : (
-                  <div className="flex-1 hidden sm:block" />
-                )}
-              </div>
-            )}
+              {project && sections.length === 0 && (
+                <div className="flex items-center justify-center py-24">
+                  <p className="text-sm text-white/80">No content found in this Notion page yet.</p>
+                </div>
+              )}
+
+
+            </div>
           </div>
         </div>
       </div>
@@ -520,7 +449,7 @@ function ProjectScrollNav({ sections, activeSection, onSectionClick }: ProjectSc
     >
       {/* Popover menu showing section names */}
       <div
-        className={`absolute right-6 bg-[#131313] border border-white/[0.08] rounded-xl p-3 flex flex-col gap-1 shadow-2xl min-w-[160px] transition-all duration-200 origin-right ${isHovered
+        className={`absolute right-6 bg-[#111214] border border-white/[0.08] rounded-xl p-3 flex flex-col gap-1 shadow-2xl min-w-[160px] transition-all duration-200 origin-right ${isHovered
           ? 'opacity-100 scale-100 translate-x-0'
           : 'opacity-0 scale-95 translate-x-1 pointer-events-none'
           }`}
