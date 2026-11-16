@@ -54,7 +54,7 @@ export const Sidebar = forwardRef<SidebarHandle, SidebarProps>(
     }));
 
     return (
-      <aside className="w-full lg:w-[400px] shrink-0 flex flex-col lg:justify-between lg:h-screen lg:sticky top-0 pt-6 lg:pt-10 pb-0 lg:pb-0 px-5 lg:px-10 gap-0 bg-transparent z-10 overflow-hidden">
+      <aside className="w-full lg:w-[400px] shrink-0 flex flex-col lg:justify-between lg:h-screen lg:sticky top-0 pt-6 lg:pt-10 pb-0 lg:pb-0 px-4 sm:px-6 lg:px-10 gap-0 bg-transparent z-10 overflow-hidden">
 
         {/* TOP SECTION */}
         <div className="flex flex-col gap-0">
@@ -79,13 +79,13 @@ export const Sidebar = forwardRef<SidebarHandle, SidebarProps>(
               transition={showSecondary
                 ? { duration: 0 }
                 : { duration: 0.5, ease: 'easeOut', delay: 0.1 }}
-              className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-full px-5 py-2.5"
+              className="flex items-center gap-2.5 sm:gap-4 bg-white/5 border border-white/10 rounded-full px-3.5 sm:px-5 py-1.5 sm:py-2.5"
             >
               {navItems.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => scrollToSection(item.id)}
-                  className={`text-sm font-medium transition-colors ${activeSection === item.id ? 'text-white' : 'text-white/50 hover:text-white/80'}`}
+                  className={`text-xs sm:text-sm font-medium transition-colors ${activeSection === item.id ? 'text-white' : 'text-white/50 hover:text-white/80'}`}
                 >
                   {item.label}
                 </button>
@@ -138,7 +138,7 @@ export const Sidebar = forwardRef<SidebarHandle, SidebarProps>(
 
           {/* Heading */}
           <div className="mt-0">
-            <h1 className="text-3xl lg:text-4xl font-semibold leading-[1.15] tracking-tight text-white">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold leading-[1.2] lg:leading-[1.15] tracking-tight text-white">
               <span
                 ref={titleTextRef}
                 className="inline-block transition-opacity duration-300"
@@ -153,7 +153,7 @@ export const Sidebar = forwardRef<SidebarHandle, SidebarProps>(
                 transition={showSecondary
                   ? { duration: 0 }
                   : { duration: 0.5, ease: 'easeOut', delay: 0.08 }}
-                className="text-white/60 font-medium lg:ml-0 ml-2 inline-block"
+                className="text-white/60 font-medium block sm:inline-block sm:ml-2 lg:ml-0 lg:block mt-1 sm:mt-0"
               >
                 Product Designer &amp; Builder.
               </motion.span>
@@ -167,7 +167,7 @@ export const Sidebar = forwardRef<SidebarHandle, SidebarProps>(
             transition={showSecondary
               ? { duration: 0 }
               : { duration: 0.5, ease: 'easeOut', delay: 0.14 }}
-            className="text-base font-medium text-white/60 leading-relaxed max-w-sm mt-4"
+            className="text-sm sm:text-base font-medium text-white/60 leading-relaxed max-w-sm mt-3 sm:mt-4"
           >
             3+ years of experience in designing products at fast-paced, high-ownership startups—from MVP to Growth.
           </motion.p>
@@ -191,7 +191,7 @@ export const Sidebar = forwardRef<SidebarHandle, SidebarProps>(
             </motion.div>
 
             {/* Mobile-only: meworking.png to the right of CTA (no right/bottom padding inset) */}
-            <div className="lg:hidden overflow-hidden pointer-events-none select-none -mr-5 shrink-0">
+            <div className="lg:hidden overflow-hidden pointer-events-none select-none -mr-4 sm:-mr-6 shrink-0">
               <motion.div
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: showSecondary ? 1 : 0, y: showSecondary ? 0 : 50 }}

@@ -298,12 +298,27 @@ html.custom-cursor-mode * {
   }
 }
 
-.animate-carousel {
-  display: flex;
-  animation: carousel-scroll 20s linear infinite;
+@keyframes carousel-scroll-reverse {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 
-.animate-carousel:hover {
+.animate-carousel {
+  display: flex;
+  animation: carousel-scroll 24s linear infinite;
+}
+
+.animate-carousel-reverse {
+  display: flex;
+  animation: carousel-scroll-reverse 24s linear infinite;
+}
+
+.animate-carousel:hover,
+.animate-carousel-reverse:hover {
   animation-play-state: paused;
 }
 

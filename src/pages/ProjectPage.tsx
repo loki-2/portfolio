@@ -1,23 +1,26 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Zap } from 'lucide-react';
 import { ProjectTags } from '@/components/ProjectTag';
 import { getCachedProject, upsertProject, getAllProjectsFromCache } from '@/lib/supabase';
 import { getProjectWithBlocks } from '@/lib/notion';
-import { SectionContent, groupBlocksIntoSections } from '@/components/NotionRenderer';
-import type { NotionProject, ProjectSection } from '@/lib/types';
+import { SectionContent, groupProjectBlocksIntoTabs } from '@/components/NotionRenderer';
+import { ProjectTabs } from '@/components/ProjectTabs';
+import type { NotionProject, ProjectSection, NotionBlock } from '@/lib/types';
 import { TwitterTickerSection } from '@/components/TwitterTicker';
 import {
   PROJECT_ORDER,
   COVER_IMAGES,
   getCoverImageForProject,
+  getCarouselImagesForProject,
+  getCarouselBgForProject,
   getProjectIndex,
   getCleanPageId,
 } from '@/lib/projects';
 import { useSmoothScroll } from '@/lib/useSmoothScroll';
 
-// ─── Hero banner ──────────────────────────────────────────────────────────────
+// ─── Hero Banner with 3-Card Rotating Carousel ────────────────────────────────
 function HeroBanner({
   coverImage,
   notionPageId,
@@ -27,26 +30,154 @@ function HeroBanner({
   index?: number;
 }) {
   const cleanId = notionPageId ? notionPageId.replace(/-/g, '') : '';
+  const carouselImages = getCarouselImagesForProject(notionPageId);
+  const carouselBg = getCarouselBgForProject(notionPageId);
+
+  // Fallback to coverImage if carouselImages empty
+  const rawImages =
+    carouselImages && carouselImages.length > 0
+      ? carouselImages
+      : coverImage
+        ? [coverImage]
+        : [];
+
+  const displayImages =
+    rawImages.length === 2 ? [...rawImages, ...rawImages] : rawImages;
+
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
+
+  useEffect(() => {
+    const updateSize = () => {
+      const w = window.innerWidth;
+      if (w < 640) setScreenSize('mobile');
+      else if (w < 1024) setScreenSize('tablet');
+      else setScreenSize('desktop');
+    };
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+
+  // Auto-rotate the carousel
+  useEffect(() => {
+    if (displayImages.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % displayImages.length);
+    }, 2800);
+    return () => clearInterval(interval);
+  }, [displayImages.length]);
+
+  const xOffset =
+    screenSize === 'mobile' ? 190 : screenSize === 'tablet' ? 290 : 380;
+
+  const isClass = carouselBg.startsWith('bg-');
+  const cardStyle = !isClass ? { backgroundColor: carouselBg } : undefined;
+
+  // Calculate diff and sort so center hero card renders last in DOM (guaranteed on top)
+  const items = displayImages.map((src, i) => {
+    let diff = i - activeIndex;
+    if (diff > displayImages.length / 2) diff -= displayImages.length;
+    if (diff < -displayImages.length / 2) diff += displayImages.length;
+    return { src, i, diff };
+  });
+
+  const sortedItems = [...items].sort((a, b) => {
+    const aIsCenter = a.diff === 0;
+    const bIsCenter = b.diff === 0;
+    if (aIsCenter && !bIsCenter) return 1;
+    if (!aIsCenter && bIsCenter) return -1;
+    return 0;
+  });
 
   return (
     <motion.div
       layoutId={`card-${cleanId}`}
-      className="w-full rounded-xl overflow-hidden relative flex flex-col justify-end items-center"
-      style={{ minHeight: 200, backgroundColor: '#111214' }}
+      className="w-full rounded-2xl overflow-hidden relative flex flex-col justify-center items-center py-5 sm:py-7 lg:py-9 border border-white/[0.08]"
+      style={{ backgroundColor: '#111214', minHeight: 260 }}
       transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
     >
-      {/* Cover image */}
-      {coverImage && (
-        <div className="w-full pt-6 sm:pt-8 lg:pt-10 px-4 sm:px-6 lg:px-10 flex items-end justify-center relative">
-          <motion.img
-            layoutId={`card-image-${cleanId}`}
-            src={coverImage}
-            alt=""
-            className="w-full h-auto max-h-[380px] lg:max-h-[440px] object-cover object-left-top rounded-none block -mb-2"
-            transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
-          />
+      <div
+        className="relative w-full h-[220px] sm:h-[300px] lg:h-[370px] overflow-hidden flex items-center justify-center pointer-events-none"
+        style={{
+          maskImage:
+            'linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)',
+          WebkitMaskImage:
+            'linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)',
+        }}
+      >
+        <div className="relative w-full h-full flex items-center justify-center">
+          {sortedItems.map(({ src, i, diff }) => {
+            const isCenter = diff === 0;
+            const isLeft = diff === -1;
+            const isRight = diff === 1;
+
+            let x = 0;
+            let scale = 1;
+            let opacity = 0;
+            let zIndex = 1;
+
+            if (isCenter) {
+              x = 0;
+              scale = 1;
+              opacity = 1;
+              zIndex = 20;
+            } else if (isLeft) {
+              x = -xOffset;
+              scale = 0.78;
+              opacity = 0.45;
+              zIndex = 2;
+            } else if (isRight) {
+              x = xOffset;
+              scale = 0.78;
+              opacity = 0.45;
+              zIndex = 2;
+            } else {
+              x = diff < 0 ? -xOffset * 1.6 : xOffset * 1.6;
+              scale = 0.65;
+              opacity = 0;
+              zIndex = 0;
+            }
+
+            const sizeClasses = isCenter
+              ? 'w-[230px] sm:w-[350px] lg:w-[460px] h-[180px] sm:h-[265px] lg:h-[330px] px-3 sm:px-4 py-0 rounded-[12px] shadow-2xl'
+              : 'w-[170px] sm:w-[260px] lg:w-[340px] h-[135px] sm:h-[200px] lg:h-[245px] px-2 sm:px-3 py-0 rounded-[12px] shadow-lg';
+
+            return (
+              <motion.div
+                key={src + '-' + i}
+                initial={false}
+                animate={{
+                  x,
+                  scale,
+                  opacity,
+                  zIndex,
+                }}
+                transition={{
+                  duration: 0.72,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                className="absolute flex items-center justify-center"
+                style={{
+                  zIndex,
+                  pointerEvents: 'none',
+                }}
+              >
+                <div
+                  className={`flex items-end justify-center border border-black/10 shrink-0 select-none overflow-hidden transition-all duration-300 ${sizeClasses} ${isClass ? carouselBg : ''}`}
+                  style={cardStyle}
+                >
+                  <img
+                    src={src}
+                    alt=""
+                    className="w-full h-full object-contain object-bottom rounded-[12px] pointer-events-none block"
+                  />
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
-      )}
+      </div>
     </motion.div>
   );
 }
@@ -108,7 +239,7 @@ function ProjectSidebar({ project, notionPageId, optimisticTitle, optimisticTags
   const team = project?.team;
 
   return (
-    <aside className="w-full lg:w-[400px] shrink-0 flex flex-col lg:justify-between lg:h-screen lg:sticky top-0 lg:overflow-y-auto py-6 lg:py-10 px-5 lg:px-10 border-b lg:border-b-0 lg:border-r border-white/[0.06] bg-transparent z-10">
+    <aside className="w-full lg:w-[400px] shrink-0 flex flex-col lg:justify-between lg:h-screen lg:sticky top-0 lg:overflow-y-auto py-6 lg:py-10 px-4 sm:px-6 lg:px-10 border-b lg:border-b-0 lg:border-r border-white/[0.06] bg-transparent z-10">
 
       {/* TOP SECTION */}
       <div className="flex flex-col gap-0">
@@ -126,45 +257,45 @@ function ProjectSidebar({ project, notionPageId, optimisticTitle, optimisticTags
         <div className="mt-0">
           <motion.h1
             layoutId={`card-title-${cleanId}`}
-            className="text-2xl lg:text-3xl font-semibold leading-tight tracking-tight text-white"
+            className="text-xl sm:text-2xl lg:text-3xl font-semibold leading-tight tracking-tight text-white"
             transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
           >
             {title}
           </motion.h1>
 
-          {/* Subtext — matches homepage subtext font, size, weight, color, leading, mt-4 */}
+          {/* Subtext — matches homepage subtext font, size, weight, color, leading */}
           {subtext && (
             <motion.p
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15, duration: 0.35, ease: 'easeOut' }}
-              className="text-base font-medium text-white/60 leading-relaxed max-w-sm mt-4"
+              className="text-sm sm:text-base font-medium text-white/60 leading-relaxed max-w-sm mt-3 sm:mt-4"
             >
               {subtext}
             </motion.p>
           )}
 
           {/* Tags — shared layoutId matches WorkCard tags div */}
-          <div className="mt-5 lg:mt-6">
+          <div className="mt-4 sm:mt-5 lg:mt-6">
             <ProjectTags tags={tags} layoutId={`card-tags-${cleanId}`} />
           </div>
         </div>
       </div>
 
-      {/* Meta fields (Duration & Team) — 2 rows (label on top, value below) with increased gap */}
+      {/* Meta fields (Duration & Team) — 2 cols on mobile, vertical stack on desktop */}
       {project && (duration || team) && (
-        <div className="mt-8 lg:mt-auto pt-6 border-t border-white/[0.06] flex flex-col gap-6 lg:gap-7">
+        <div className="mt-6 lg:mt-auto pt-5 lg:pt-6 border-t border-white/[0.06] grid grid-cols-2 lg:flex lg:flex-col gap-4 lg:gap-7">
           {[
             { label: 'Duration', value: duration },
             { label: 'Team', value: team },
           ]
             .filter((m) => m.value)
             .map(({ label, value }) => (
-              <div key={label} className="flex flex-col gap-1.5">
-                <span className="text-[11px] uppercase tracking-wider font-semibold text-white/60">
+              <div key={label} className="flex flex-col gap-1 sm:gap-1.5">
+                <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold text-white/60">
                   {label}
                 </span>
-                <span className="text-sm font-medium text-white/90 leading-snug">{value}</span>
+                <span className="text-xs sm:text-sm font-medium text-white/90 leading-snug">{value}</span>
               </div>
             ))}
         </div>
@@ -183,17 +314,25 @@ export function ProjectPage() {
 
   const normalizedPageId = getCleanPageId(pageId);
   const [project, setProject] = useState<NotionProject | null>(null);
-  const [sections, setSections] = useState<ProjectSection[]>([]);
+  const [quickSections, setQuickSections] = useState<ProjectSection[]>([]);
+  const [detailedSections, setDetailedSections] = useState<ProjectSection[]>([]);
+  const [activeTab, setActiveTab] = useState<'quick' | 'detailed'>(() => {
+    const tabParam = searchParams.get('tab');
+    return tabParam === 'detailed' ? 'detailed' : 'quick';
+  });
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState('');
   const [isFirstProject, setIsFirstProject] = useState(normalizedPageId === PROJECT_ORDER[0]);
   const [allProjects, setAllProjects] = useState<Omit<NotionProject, 'blocks' | 'updatedAt'>[]>([]);
 
+  const currentSections = activeTab === 'quick' ? quickSections : detailedSections;
+
   useEffect(() => {
-    if (sections.length > 0) {
+    if (currentSections.length > 0) {
       lenisRef.current?.resize();
     }
-  }, [sections, lenisRef]);
+  }, [currentSections, lenisRef]);
 
   // Check if current page is the first project & fetch all projects for prev/next
   useEffect(() => {
@@ -223,12 +362,45 @@ export function ProjectPage() {
 
   const forceRefresh = searchParams.get('refresh') === 'true';
 
+  const applyBlocks = useCallback((blocks: NotionBlock[]) => {
+    const { quickSections: qs, detailedSections: ds, hasQuickRead: hqr } = groupProjectBlocksIntoTabs(blocks);
+    setQuickSections(qs);
+    setDetailedSections(ds);
+    setIsLoading(false);
+
+    // If no URL tab query parameter is present, pick smart default:
+    // If Quick Read exists, default to Quick Read; otherwise Detailed.
+    const tabParam = searchParams.get('tab');
+    if (tabParam === 'detailed' || tabParam === 'quick') {
+      setActiveTab(tabParam);
+    } else if (hqr) {
+      setActiveTab('quick');
+    } else {
+      setActiveTab('detailed');
+    }
+  }, [searchParams]);
+
+  const handleTabChange = useCallback((tab: 'quick' | 'detailed') => {
+    setActiveTab(tab);
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('tab', tab);
+    setSearchParams(newParams, { replace: true, state });
+    // Reset activeSection
+    const target = tab === 'quick' ? quickSections : detailedSections;
+    if (target.length > 0) {
+      setActiveSection(`section-${target[0].title.toLowerCase().replace(/\s+/g, '-')}`);
+    } else {
+      setActiveSection('');
+    }
+  }, [searchParams, setSearchParams, state, quickSections, detailedSections]);
+
   // ── Load project data (Supabase-first, Notion as fallback) ──────────────────
   useEffect(() => {
     if (!pageId) return;
 
     let cancelled = false;
     setError(null);
+    setIsLoading(true);
     // Don't reset project — keep showing whatever we have (optimistic state)
 
     (async () => {
@@ -237,7 +409,7 @@ export function ProjectPage() {
         const cached = await getCachedProject(pageId);
         if (cached && !cancelled) {
           setProject(cached);
-          setSections(groupBlocksIntoSections(cached.blocks));
+          applyBlocks(cached.blocks);
 
           // If forceRefresh, also re-fetch from Notion in the background to update cache
           if (forceRefresh) {
@@ -245,7 +417,7 @@ export function ProjectPage() {
               .then((fresh) => {
                 if (!cancelled) {
                   setProject(fresh);
-                  setSections(groupBlocksIntoSections(fresh.blocks));
+                  applyBlocks(fresh.blocks);
                 }
                 upsertProject(fresh).catch(() => { });
               })
@@ -265,7 +437,7 @@ export function ProjectPage() {
         const data = await getProjectWithBlocks(pageId);
         if (!cancelled) {
           setProject(data);
-          setSections(groupBlocksIntoSections(data.blocks));
+          applyBlocks(data.blocks);
           if (searchParams.has('refresh')) {
             const newParams = new URLSearchParams(searchParams);
             newParams.delete('refresh');
@@ -277,17 +449,18 @@ export function ProjectPage() {
       } catch (err) {
         if (!cancelled) {
           setError((err as Error).message);
+          setIsLoading(false);
         }
       }
     })();
 
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageId, forceRefresh]);
+  }, [pageId, forceRefresh, applyBlocks]);
 
   // ── Scroll-spy ─────────────────────────────────────────────────────────────
   useEffect(() => {
-    if (!sections.length) return;
+    if (!currentSections.length) return;
     const content = contentRef.current;
     if (!content) return;
 
@@ -303,7 +476,7 @@ export function ProjectPage() {
     );
     sectionEls.forEach((el) => observer.observe(el));
     return () => sectionEls.forEach((el) => observer.unobserve(el));
-  }, [sections]);
+  }, [currentSections]);
 
   // ── Nav click ──────────────────────────────────────────────────────────────
   const scrollToSection = useCallback((id: string) => {
@@ -354,7 +527,7 @@ export function ProjectPage() {
         optimisticTitle={state?.title}
         optimisticTags={state?.tags}
         optimisticDescription={state?.description}
-        sections={sections}
+        sections={currentSections}
         activeSection={activeSection}
         onNavClick={scrollToSection}
       />
@@ -366,7 +539,7 @@ export function ProjectPage() {
 
           <div className="relative z-10">
             {/* Hero banner — keeps its own horizontal padding */}
-            <div className="px-4 lg:px-4">
+            <div className="px-4 sm:px-6 lg:px-4">
               <HeroBanner
                 coverImage={activeCoverImage}
                 notionPageId={pageId!}
@@ -374,10 +547,18 @@ export function ProjectPage() {
               />
             </div>
 
-            {/* Notion content sections — crossfade skeleton → content without layout shift */}
-            <div className="mt-1 px-4 relative">
+            {/* Mode Switcher Tabs: "Quick Read" | "Detailed" */}
+            <div className="px-4 sm:px-6 lg:px-4">
+              <ProjectTabs
+                activeTab={activeTab}
+                onChange={handleTabChange}
+              />
+            </div>
+
+            {/* Content sections */}
+            <div className="mt-1 px-4 sm:px-6 lg:px-4 relative">
               {/* Skeleton: fades out when sections load */}
-              {sections.length === 0 && !error && (
+              {isLoading && !error && (
                 <motion.div
                   key="skeleton"
                   initial={{ opacity: 1 }}
@@ -389,39 +570,72 @@ export function ProjectPage() {
                 </motion.div>
               )}
 
-              {/* Content: fades in when sections load */}
-              {sections.length > 0 && (
+              {/* Quick Read tab content */}
+              {!isLoading && activeTab === 'quick' && (
                 <motion.div
-                  key="loaded"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.35, ease: 'easeOut' }}
+                  key="quick-tab"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.28, ease: 'easeOut' }}
                 >
-                  {project && sections.map((section, i) => (
-                    <SectionContent key={section.title} section={section} isFirst={i === 0} />
-                  ))}
+                  {quickSections.length > 0 ? (
+                    quickSections.map((section, i) => (
+                      <SectionContent key={`quick-${section.title}-${i}`} section={section} isFirst={i === 0} />
+                    ))
+                  ) : (
+                    <div className="w-full rounded-2xl border border-white/[0.08] bg-[#111214] p-8 sm:p-12 text-center flex flex-col items-center justify-center gap-4 mt-4">
+                      <div className="w-12 h-12 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-white/60">
+                        <Zap className="w-5 h-5 text-yellow-300" />
+                      </div>
+                      <div className="flex flex-col gap-1.5 max-w-md">
+                        <h3 className="text-lg font-semibold text-white">Quick Read Coming Soon</h3>
+                        {/* <p className="text-sm text-white/50 leading-relaxed">
+                          To add a Quick Read for this project, add a <span className="text-white/80 font-mono text-xs bg-white/10 px-1.5 py-0.5 rounded"># Quick Read</span> section in your Notion page.
+                        </p> */}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleTabChange('detailed')}
+                        className="mt-2 px-5 py-2.5 rounded-full bg-white text-black font-semibold text-sm hover:bg-white/90 transition-all flex items-center gap-2 shadow-lg cursor-pointer"
+                      >
+                        Read Detailed Case Study →
+                      </button>
+                    </div>
+                  )}
                 </motion.div>
               )}
 
-              {/* Twitter / X posts 2-row continuous ticker — rendered ONLY for the first article once loaded */}
-              {isFirstProject && sections.length > 0 && <TwitterTickerSection />}
+              {/* Detailed tab content */}
+              {!isLoading && activeTab === 'detailed' && (
+                <motion.div
+                  key="detailed-tab"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.28, ease: 'easeOut' }}
+                >
+                  {detailedSections.length > 0 ? (
+                    detailedSections.map((section, i) => (
+                      <SectionContent key={`detailed-${section.title}-${i}`} section={section} isFirst={i === 0} />
+                    ))
+                  ) : (
+                    <div className="flex items-center justify-center py-24">
+                      <p className="text-sm text-white/80">No content found in this Notion page yet.</p>
+                    </div>
+                  )}
 
-              {project && sections.length === 0 && (
-                <div className="flex items-center justify-center py-24">
-                  <p className="text-sm text-white/80">No content found in this Notion page yet.</p>
-                </div>
+                  {/* Twitter / X posts 2-row continuous ticker — rendered ONLY for the first article once loaded */}
+                  {isFirstProject && detailedSections.length > 0 && <TwitterTickerSection />}
+                </motion.div>
               )}
-
-
             </div>
           </div>
         </div>
       </div>
 
       {/* Right side vertical tick indicator / menu popover */}
-      {sections.length > 0 && (
+      {currentSections.length > 0 && (
         <ProjectScrollNav
-          sections={sections}
+          sections={currentSections}
           activeSection={activeSection}
           onSectionClick={scrollToSection}
         />

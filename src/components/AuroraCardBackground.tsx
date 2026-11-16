@@ -62,7 +62,7 @@ export const AuroraCardBackground: React.FC<{
 
     return (
       <>
-        {/* ── Background layer (behind z-index: -1 images) ── */}
+        {/* ── Background layer (behind card content) ── */}
         <div
           style={{
             position: 'absolute',
@@ -74,69 +74,63 @@ export const AuroraCardBackground: React.FC<{
             pointerEvents: 'none',
           }}
         >
-          {/* ── Subtle color background revealed on hover ── */}
+          {/* ── Very subtle dotted pattern across the entire card ── */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: 'radial-gradient(circle, rgba(255, 255, 255, 0.22) 1.5px, transparent 1.6px)',
+              backgroundSize: '12px 12px',
+              backgroundPosition: '0 0',
+              opacity: isHovered ? 0.42 : 0.20,
+              transition: 'opacity 0.45s ease',
+              zIndex: 0,
+              pointerEvents: 'none',
+            }}
+          />
+
+          {/* ── Top-left corner light and color gradient glow on hover ── */}
           <div
             style={{
               position: 'absolute',
               inset: 0,
               opacity: isHovered ? 1 : 0,
-              transition: 'opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1)',
+              transition: 'opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+              zIndex: 1,
+              pointerEvents: 'none',
             }}
           >
-            {/* Subtle ambient wash across the whole card */}
+            {/* Luminous light flare at the top-left corner */}
+            <div
+              style={{
+                position: 'absolute',
+                top: '-8%',
+                left: '-8%',
+                width: '60%',
+                height: '70%',
+                background: `radial-gradient(circle at 15% 15%, rgba(255, 255, 255, 0.22) 0%, ${hexToRgba(p, 0.42)} 22%, ${hexToRgba(p, 0.18)} 48%, transparent 75%)`,
+                filter: 'blur(30px)',
+                pointerEvents: 'none',
+              }}
+            />
+
+            {/* Directional light and color gradient radiating from the top-left */}
             <div
               style={{
                 position: 'absolute',
                 inset: 0,
-                background: `radial-gradient(120% 120% at 50% 40%, ${hexToRgba(p, 0.12)} 0%, ${hexToRgba(s, 0.06)} 55%, transparent 100%)`,
+                background: `radial-gradient(115% 95% at 0% 0%, ${hexToRgba(p, 0.30)} 0%, ${hexToRgba(s, 0.15)} 35%, ${hexToRgba(s, 0.03)} 65%, transparent 85%)`,
+                pointerEvents: 'none',
               }}
             />
 
-            {/* Moving Pool 1 — Primary color orb drifting top-left to center */}
+            {/* Crisp top-left diagonal light sheen */}
             <div
               style={{
                 position: 'absolute',
-                width: '80%',
-                height: '85%',
-                top: '-15%',
-                left: '-10%',
-                borderRadius: '50%',
-                background: `radial-gradient(circle, ${hexToRgba(p, 0.26)} 0%, ${hexToRgba(p, 0.08)} 50%, transparent 75%)`,
-                filter: 'blur(55px)',
-                animation: 'subtle-color-move-1 12s ease-in-out infinite',
-                willChange: 'transform',
-              }}
-            />
-
-            {/* Moving Pool 2 — Secondary color orb drifting bottom-right */}
-            <div
-              style={{
-                position: 'absolute',
-                width: '75%',
-                height: '80%',
-                bottom: '-15%',
-                right: '-10%',
-                borderRadius: '50%',
-                background: `radial-gradient(circle, ${hexToRgba(s, 0.22)} 0%, ${hexToRgba(s, 0.06)} 50%, transparent 75%)`,
-                filter: 'blur(60px)',
-                animation: 'subtle-color-move-2 15s ease-in-out infinite',
-                willChange: 'transform',
-              }}
-            />
-
-            {/* Moving Pool 3 — Ambient center accent drift */}
-            <div
-              style={{
-                position: 'absolute',
-                width: '65%',
-                height: '65%',
-                top: '20%',
-                left: '25%',
-                borderRadius: '50%',
-                background: `radial-gradient(circle, ${hexToRgba(p, 0.18)} 0%, transparent 70%)`,
-                filter: 'blur(65px)',
-                animation: 'subtle-color-move-3 18s ease-in-out infinite',
-                willChange: 'transform',
+                inset: 0,
+                background: `linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, ${hexToRgba(p, 0.07)} 25%, transparent 60%)`,
+                pointerEvents: 'none',
               }}
             />
           </div>
@@ -146,8 +140,9 @@ export const AuroraCardBackground: React.FC<{
             style={{
               position: 'absolute',
               inset: 0,
-              zIndex: 1,
-              background: 'linear-gradient(to right, rgba(17,18,20,0.45) 0%, rgba(17,18,20,0.15) 45%, transparent 100%)',
+              zIndex: 2,
+              background: 'linear-gradient(to right, rgba(17,18,20,0.35) 0%, rgba(17,18,20,0.10) 45%, transparent 100%)',
+              pointerEvents: 'none',
             }}
           />
         </div>
@@ -158,7 +153,7 @@ export const AuroraCardBackground: React.FC<{
             position: 'absolute',
             inset: 0,
             borderRadius: 'inherit',
-            border: `2px solid ${isHovered ? hexToRgba(p, 0.06) : 'rgba(255, 255, 255, 0.03)'}`,
+            border: `1.5px solid ${isHovered ? hexToRgba(p, 0.18) : 'rgba(255, 255, 255, 0.04)'}`,
             transition: 'border-color 0.45s ease',
             zIndex: 20,
             pointerEvents: 'none',

@@ -49,8 +49,8 @@ function AutoPlayVideo({ src, caption }: { src: string; caption: NotionRichText[
   }, [src]);
 
   return (
-    <figure className="my-8 -mx-4 lg:-mx-6 flex flex-col items-center">
-      <div className="w-full rounded-[0px] bg-white p-6 sm:p-8 lg:p-12 shadow-2xl flex items-center justify-center overflow-hidden">
+    <figure className="my-6 sm:my-8 -mx-4 lg:-mx-6 flex flex-col items-center">
+      <div className="w-full rounded-[0px] bg-white p-3.5 sm:p-6 lg:p-12 shadow-2xl flex items-center justify-center overflow-hidden">
         <video
           ref={videoRef}
           src={src}
@@ -59,7 +59,7 @@ function AutoPlayVideo({ src, caption }: { src: string; caption: NotionRichText[
           muted
           playsInline
           preload="auto"
-          className="w-auto max-w-full h-auto max-h-[75vh] rounded-[20px] block mx-auto object-contain"
+          className="w-auto max-w-full h-auto max-h-[75vh] rounded-[14px] sm:rounded-[20px] block mx-auto object-contain"
         />
       </div>
       {caption.length > 0 && (
@@ -81,52 +81,52 @@ function BlockRenderer({ block }: { block: NotionBlock }) {
 
   switch (block.type) {
     case 'paragraph':
-      if (!b.paragraph?.rich_text?.length) return <div className="h-3" />;
+      if (!b.paragraph?.rich_text?.length) return <div className="h-2.5 sm:h-3" />;
       return (
-        <p className={`text-[1.1rem] font-medium text-white/72 leading-[32px] mb-4 ${TEXT_WRAPPER}`}>
+        <p className={`text-[0.95rem] sm:text-[1.05rem] lg:text-[1.1rem] font-medium text-white/72 leading-[26px] sm:leading-[30px] lg:leading-[32px] mb-3 sm:mb-4 ${TEXT_WRAPPER}`}>
           <RichText items={b.paragraph.rich_text} />
         </p>
       );
 
     case 'heading_1':
       return (
-        <h1 className={`text-[2rem] leading-relaxed font-semibold text-white mt-6 mb-2 ${TEXT_WRAPPER}`}>
+        <h1 className={`text-xl sm:text-2xl lg:text-[2rem] leading-snug sm:leading-relaxed font-semibold text-white mt-5 sm:mt-6 mb-2 ${TEXT_WRAPPER}`}>
           <RichText items={b.heading_1?.rich_text ?? []} />
         </h1>
       );
 
     case 'heading_2':
       return (
-        <h2 className={`text-[1.8rem] font-semibold text-white mt-6 mb-2 ${TEXT_WRAPPER}`}>
+        <h2 className={`text-lg sm:text-xl lg:text-[1.8rem] leading-snug font-semibold text-white mt-5 sm:mt-6 mb-2 ${TEXT_WRAPPER}`}>
           <RichText items={b.heading_2?.rich_text ?? []} />
         </h2>
       );
 
     case 'heading_3':
       return (
-        <h3 className={`text-[1.4rem] font-semibold text-white mt-10 mb-2 tracking-tight ${TEXT_WRAPPER}`}>
+        <h3 className={`text-base sm:text-lg lg:text-[1.4rem] font-semibold text-white mt-6 sm:mt-8 lg:mt-10 mb-2 tracking-tight ${TEXT_WRAPPER}`}>
           <RichText items={b.heading_3?.rich_text ?? []} />
         </h3>
       );
 
     case 'bulleted_list_item':
       return (
-        <li className="flex gap-2 text-[1.1rem] text-white/90 leading-relaxed mb-1.5">
-          <span className="mt-3 mr-2 w-1.5 h-1.5 rounded-full bg-white/30 shrink-0" />
+        <li className="flex gap-2 text-[0.95rem] sm:text-[1.05rem] lg:text-[1.1rem] text-white/90 leading-relaxed mb-1.5">
+          <span className="mt-2.5 mr-2 w-1.5 h-1.5 rounded-full bg-white/30 shrink-0" />
           <span><RichText items={b.bulleted_list_item?.rich_text ?? []} /></span>
         </li>
       );
 
     case 'numbered_list_item':
       return (
-        <li className="text-[1.1rem] text-white/90 leading-relaxed mb-1.5 list-decimal list-inside">
+        <li className="text-[0.95rem] sm:text-[1.05rem] lg:text-[1.1rem] text-white/90 leading-relaxed mb-1.5 list-decimal list-inside">
           <RichText items={b.numbered_list_item?.rich_text ?? []} />
         </li>
       );
 
     case 'quote':
       return (
-        <blockquote className={`border-l-2 border-white/20 pl-4 py-1 my-8 text-[1.5rem] text-white/90 italic leading-relaxed ${TEXT_WRAPPER}`}>
+        <blockquote className={`border-l-2 border-white/20 pl-4 py-1 my-6 sm:my-8 text-base sm:text-lg lg:text-[1.5rem] text-white/90 italic leading-relaxed ${TEXT_WRAPPER}`}>
           <RichText items={b.quote?.rich_text ?? []} />
         </blockquote>
       );
@@ -320,11 +320,11 @@ export function SectionContent({ section, isFirst }: { section: ProjectSection; 
       className={`w-full ${isFirst ? 'mt-4 lg:mt-6' : 'mt-4 lg:mt-6'}`}
     >
       <div
-        className="w-full px-4 lg:px-6 py-8 lg:py-12"
+        className="w-full px-4 sm:px-6 py-6 sm:py-8 lg:py-12"
         style={{ background: '#111214', borderRadius: 12 }}
       >
         <div className="w-full flex flex-col gap-4">
-          <h2 className={`text-2xl lg:text-3xl font-semibold text-white tracking-tight ${TEXT_WRAPPER}`}>{section.title}</h2>
+          <h2 className={`text-xl sm:text-2xl lg:text-3xl font-semibold text-white tracking-tight ${TEXT_WRAPPER}`}>{section.title}</h2>
           <div>{renderBlocksGrouped(section.blocks)}</div>
         </div>
       </div>
@@ -349,4 +349,112 @@ export function groupBlocksIntoSections(blocks: NotionBlock[]): ProjectSection[]
   }
   if (current) sections.push(current);
   return sections;
+}
+
+// ─── Tabbed block grouper (Quick Read vs Detailed) ───────────────────────────
+export interface TabbedProjectSections {
+  quickSections: ProjectSection[];
+  detailedSections: ProjectSection[];
+  hasQuickRead: boolean;
+}
+
+export function groupProjectBlocksIntoTabs(blocks: NotionBlock[]): TabbedProjectSections {
+  const quickSections: ProjectSection[] = [];
+  const detailedSections: ProjectSection[] = [];
+
+  const getText = (b: NotionBlock, type: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rt = (b as any)[type]?.rich_text ?? [];
+    return rt.map((r: NotionRichText) => r.plain_text).join('').trim();
+  };
+
+  // 1. Group into top-level H1 sections
+  const h1Sections: { title: string; blocks: NotionBlock[] }[] = [];
+  let currentH1: { title: string; blocks: NotionBlock[] } | null = null;
+
+  for (const block of blocks) {
+    if (block.type === 'heading_1') {
+      if (currentH1) h1Sections.push(currentH1);
+      currentH1 = { title: getText(block, 'heading_1'), blocks: [] };
+    } else if (currentH1) {
+      currentH1.blocks.push(block);
+    }
+  }
+  if (currentH1) h1Sections.push(currentH1);
+
+  // Check if any H1 is explicitly named "Quick Read" / "Quick"
+  const isQuickHeading = (title: string) =>
+    /quick\s*read/i.test(title) || /^quick/i.test(title);
+
+  const isDetailedHeading = (title: string) =>
+    /^detailed/i.test(title) || /deep\s*dive/i.test(title) || /full\s*(story|case)/i.test(title);
+
+  const hasQuickH1 = h1Sections.some((s) => isQuickHeading(s.title));
+
+  if (!hasQuickH1) {
+    // If no Quick Read H1 exists, all H1 sections belong to detailed
+    return {
+      quickSections: [],
+      detailedSections: h1Sections,
+      hasQuickRead: false,
+    };
+  }
+
+  // Helper to sub-divide a Quick Read block group by heading_2 (or heading_3 if no H2 exists)
+  const extractQuickSubSections = (parentTitle: string, groupBlocks: NotionBlock[]): ProjectSection[] => {
+    const hasH2 = groupBlocks.some((b) => b.type === 'heading_2');
+    const splitType = hasH2 ? 'heading_2' : groupBlocks.some((b) => b.type === 'heading_3') ? 'heading_3' : null;
+
+    if (!splitType) {
+      return [{ title: parentTitle, blocks: groupBlocks }];
+    }
+
+    const subSections: ProjectSection[] = [];
+    let currentSub: ProjectSection | null = null;
+    const introBlocks: NotionBlock[] = [];
+
+    for (const block of groupBlocks) {
+      if (block.type === splitType) {
+        if (currentSub) subSections.push(currentSub);
+        currentSub = { title: getText(block, splitType), blocks: [] };
+      } else if (currentSub) {
+        // Keeps all other blocks (including heading_3 inside heading_2, paragraphs, images, videos, etc.)
+        currentSub.blocks.push(block);
+      } else {
+        introBlocks.push(block);
+      }
+    }
+    if (currentSub) subSections.push(currentSub);
+
+    if (introBlocks.length > 0) {
+      if (subSections.length > 0) {
+        subSections[0].blocks = [...introBlocks, ...subSections[0].blocks];
+      } else {
+        subSections.push({ title: parentTitle, blocks: introBlocks });
+      }
+    }
+
+    return subSections;
+  };
+
+  for (const section of h1Sections) {
+    if (isQuickHeading(section.title)) {
+      const subs = extractQuickSubSections(section.title, section.blocks);
+      quickSections.push(...subs);
+    } else if (isDetailedHeading(section.title)) {
+      // If there's an explicit "Detailed" H1, keep its blocks as a section if non-empty
+      if (section.blocks.length > 0) {
+        detailedSections.push(section);
+      }
+    } else {
+      // Standard case study sections (e.g. "Problem", "Research", "Outcome") -> Detailed
+      detailedSections.push(section);
+    }
+  }
+
+  return {
+    quickSections,
+    detailedSections,
+    hasQuickRead: quickSections.length > 0,
+  };
 }

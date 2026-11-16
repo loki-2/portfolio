@@ -42,17 +42,17 @@ export const FooterCTA: React.FC = () => {
       </div>
 
       {/* Main CTA Card in front of image lower body (z-20) */}
-      <div className="w-full rounded-2xl p-6 sm:p-8 lg:p-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 lg:gap-8 relative z-20 overflow-hidden bg-gradient-to-br from-[#0F3F2D] to-[#0A261B] border border-emerald-500/20 shadow-lg transition-all duration-300">
+      <div className="w-full rounded-2xl p-5 sm:p-8 lg:p-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 lg:gap-8 relative z-20 overflow-hidden bg-gradient-to-br from-[#0F3F2D] to-[#0A261B] border border-emerald-500/20 shadow-lg transition-all duration-300">
         {/* Ambient background glow */}
         <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-emerald-400/10 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-emerald-600/10 blur-3xl pointer-events-none" />
 
-        {/* Left: 2 lines of text with identical font, size, and weight */}
-        <div className="flex flex-col gap-4 z-10 min-w-0">
-          <h2 className="text-2xl sm:text-3xl lg:text-[34px] xl:text-[38px] font-semibold text-white tracking-tight leading-[44px] h-[44px] flex items-center whitespace-nowrap">
+        {/* Left: 2 lines of text */}
+        <div className="flex flex-col gap-2 sm:gap-4 z-10 min-w-0">
+          <h2 className="text-xl sm:text-2xl lg:text-[34px] xl:text-[38px] font-semibold text-white tracking-tight leading-snug lg:leading-[44px] h-auto lg:h-[44px] flex items-center whitespace-normal lg:whitespace-nowrap">
             Need a designer who takes ownership?
           </h2>
-          <p className="text-2xl sm:text-3xl lg:text-[34px] xl:text-[38px] font-semibold text-white tracking-tight leading-[44px] h-[44px] flex items-center whitespace-nowrap">
+          <p className="text-xl sm:text-2xl lg:text-[34px] xl:text-[38px] font-semibold text-white tracking-tight leading-snug lg:leading-[44px] h-auto lg:h-[44px] flex items-center whitespace-normal lg:whitespace-nowrap">
             I'd love to be your guy.
           </p>
         </div>

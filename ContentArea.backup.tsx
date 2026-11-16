@@ -483,7 +483,7 @@ export const ContentArea: React.FC = () => {
     let cancelled = false;
 
     getAllProjectsFromCache()
-      .then((projects) => {
+      .then((projects: string | any[]) => {
         if (!cancelled && projects.length > 0) {
           // Sort by the fixed display order
           const sorted = [...projects].sort((a, b) => {
@@ -668,7 +668,7 @@ export const ContentArea: React.FC = () => {
                     <img src="/claudecode.png" alt="Claude Code" className="w-full h-full object-contain" />
                   </div>
                   <div className="flex flex-col gap-2 min-w-0">
-                    <h3 className="text-xl font-medium text-white">Shipping production UI faster</h3>
+                    <h3 className="text-xl font-medium text-white">Shipping production UI</h3>
                     <p className="text-sm text-white/50 leading-relaxed">
                       I use Claude Code to implement UI fixes, polish motion interactions, and ship to production in case of less tech bandwidth.
                     </p>

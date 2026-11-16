@@ -1,20 +1,20 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Play, Pause, SkipBack, SkipForward, ChevronLeft, ChevronRight, MapPin, Volume2, VolumeX } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, ChevronLeft, ChevronRight, Volume2, VolumeX } from 'lucide-react';
 
 // ─── Photo Carousel ──────────────────────────────────────────────────────────
 
 const PHOTOS = [
-  '/me.png',
-  '/meworking.png',
-  '/me.png',
-  '/meworking.png',
-  '/me.png',
+  '/images/IMG_0215.jpeg',
+  '/images/IMG_3584.jpeg',
+  '/images/IMG_3851.jpeg',
+  '/images/IMG_4499.jpeg',
+  '/images/Impulse.jpeg',
+  '/images/82098.jpeg',
 ];
 
 const PhotoCarousel: React.FC = () => {
   const [current, setCurrent] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
   const intervalRef = useRef<number | null>(null);
   const progressRef = useRef<number | null>(null);
   const touchStartX = useRef(0);
@@ -36,14 +36,8 @@ const PhotoCarousel: React.FC = () => {
     setProgress(0);
   }, []);
 
-  // Auto-advance timer
+  // Auto-advance timer (does not stop on hover)
   useEffect(() => {
-    if (isHovered) {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      if (progressRef.current) clearInterval(progressRef.current);
-      return;
-    }
-
     progressRef.current = window.setInterval(() => {
       setProgress((prev) => {
         const next = prev + (TICK / SLIDE_DURATION) * 100;
@@ -62,7 +56,7 @@ const PhotoCarousel: React.FC = () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
       if (progressRef.current) clearInterval(progressRef.current);
     };
-  }, [current, isHovered, goNext]);
+  }, [current, goNext]);
 
   // Touch swipe handling
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -79,8 +73,6 @@ const PhotoCarousel: React.FC = () => {
   return (
     <div
       className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden group shadow-lg border border-white/[0.08]"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
@@ -725,8 +717,8 @@ const WeatherWidget: React.FC = () => {
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
       className={`flex flex-col justify-between h-full rounded-2xl p-5 min-h-[160px] relative overflow-hidden transition-all duration-300 cursor-pointer group border ${theme
-          ? `${theme.bg} ${theme.border}`
-          : 'bg-white/[0.03] border-white/[0.05]'
+        ? `${theme.bg} ${theme.border}`
+        : 'bg-white/[0.03] border-white/[0.05]'
         } hover:border-white/15`}
     >
       {/* Ambient hover weather effect (smooth fade in/out over whole card) */}
@@ -1004,13 +996,13 @@ const LocationTimeWidget: React.FC = () => {
       onMouseLeave={isTouchDevice ? undefined : handleMouseLeave}
       onClick={isTouchDevice ? () => clockSoundEngine.playTick() : undefined}
       className={`flex flex-col justify-between h-full rounded-2xl p-5 min-h-[160px] relative overflow-hidden group cursor-pointer transition-all duration-300 border ${isHovered
-          ? 'bg-white/[0.045] border-white/10 shadow-lg shadow-black/20'
-          : 'bg-white/[0.03] border-white/[0.05]'
+        ? 'bg-white/[0.045] border-white/10 shadow-lg shadow-black/20'
+        : 'bg-white/[0.03] border-white/[0.05]'
         }`}
     >
       {/* Header: Centered India */}
       <div className="flex items-center justify-center gap-1.5 text-white/40 z-10 w-full">
-        <MapPin size={12} className="text-white/50" />
+        {/* <MapPin size={12} className="text-white/50" /> */}
         <span className="text-[11px] uppercase tracking-widest font-medium text-white/50">India</span>
       </div>
 
@@ -1096,15 +1088,47 @@ interface iTunesTrack {
 }
 
 const TRACK_IDS = [
-  '1407165118', // Current track
-  '1440833237', // Let Her Go - Passenger
-  '1440857781', // Blinding Lights - The Weeknd
+  '1615142635', // Where Is the Love? - The Black Eyed Peas
+  '1850019038', // About You - The 1975
+  '1870984033', // Aperture - Harry Styles
+  '1871595253', // Homewrecker - sombr
+];
+
+const INITIAL_TRACKS: iTunesTrack[] = [
+  {
+    trackName: 'Where Is the Love?',
+    artistName: 'The Black Eyed Peas',
+    artworkUrl100: 'https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/bf/13/26/bf132644-8cb3-356a-1e35-513470b138ff/06UMGIM08920.rgb.jpg/300x300bb.jpg',
+    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview112/v4/e5/2d/a9/e52da914-5f56-550f-21f4-3453b6cb5dc8/mzaf_10023418520338786968.plus.aac.p.m4a',
+    trackViewUrl: 'https://music.apple.com/in/album/where-is-the-love/1615142131?i=1615142635',
+  },
+  {
+    trackName: 'About You',
+    artistName: 'The 1975',
+    artworkUrl100: 'https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/7c/4f/2d/7c4f2d72-b7a4-e9ca-9a67-6ee089a871d3/22UMGIM70020.rgb.jpg/300x300bb.jpg',
+    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview122/v4/f2/87/05/f28705c7-9576-96b6-3a72-e1f40d7c71ba/mzaf_613955677051390449.plus.aac.p.m4a',
+    trackViewUrl: 'https://music.apple.com/in/album/about-you/1850018862?i=1850019038',
+  },
+  {
+    trackName: 'Aperture',
+    artistName: 'Harry Styles',
+    artworkUrl100: 'https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/b8/b8/b7/b8b8b725-b1a6-89ec-9e0a-b5ea5b349079/886449942475.jpg/300x300bb.jpg',
+    previewUrl: '',
+    trackViewUrl: 'https://music.apple.com/in/album/aperture/1870984032?i=1870984033',
+  },
+  {
+    trackName: 'Homewrecker',
+    artistName: 'sombr',
+    artworkUrl100: 'https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/7b/72/77/7b727788-b715-e215-6bb9-ebcba6e7041a/093624838630.jpg/300x300bb.jpg',
+    previewUrl: '',
+    trackViewUrl: 'https://music.apple.com/in/album/homewrecker/1871595252?i=1871595253',
+  },
 ];
 
 const SONG_VOLUME = 0.20; // 20% volume for comfortable listening, balanced with ambient weather audio
 
 const MusicPlayerCard: React.FC = () => {
-  const [tracks, setTracks] = useState<iTunesTrack[]>([]);
+  const [tracks, setTracks] = useState<iTunesTrack[]>(INITIAL_TRACKS);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -1387,8 +1411,8 @@ const BooksCarousel: React.FC = () => {
 
 export const AboutSection: React.FC = () => {
   return (
-    <div className="bg-[#111214] rounded-xl p-6 lg:p-12 flex flex-col gap-8 lg:gap-10">
-      <h2 className="text-3xl lg:text-4xl font-semibold text-white tracking-tight">About</h2>
+    <div className="bg-[#111214] rounded-xl p-5 sm:p-7 lg:p-12 flex flex-col gap-6 sm:gap-8 lg:gap-10">
+      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-white tracking-tight">About</h2>
 
       {/* Row 1: Photo carousel (left) + [3 paragraphs + Weather & Time] (right) */}
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
