@@ -54,13 +54,13 @@ export const Sidebar = forwardRef<SidebarHandle, SidebarProps>(
     }));
 
     return (
-      <aside className="w-full lg:w-[400px] shrink-0 flex flex-col lg:justify-between lg:h-screen lg:sticky top-0 pt-6 lg:pt-10 pb-0 lg:pb-0 px-4 sm:px-6 lg:px-10 gap-0 bg-transparent z-10 overflow-hidden">
+      <aside className="w-full lg:w-[400px] shrink-0 flex flex-col lg:justify-between lg:h-screen lg:sticky top-0 pt-6 lg:pt-10 pb-0 lg:pb-0 px-4 sm:px-6 lg:px-10 gap-0 border-b lg:border-b-0 border-white/[0.08] bg-transparent z-10 overflow-hidden">
 
         {/* TOP SECTION */}
         <div className="flex flex-col gap-0">
 
           {/* Mobile: Avatar + Nav row */}
-          <div className="mb-6 flex justify-between items-start lg:hidden">
+          <div className="mb-6 sm:mb-7 flex justify-between items-center lg:hidden">
             <div
               ref={mobileAvatarRef}
               className="w-10 h-10 border border-white/10 rounded-full overflow-hidden bg-white/10 shrink-0"
@@ -138,7 +138,7 @@ export const Sidebar = forwardRef<SidebarHandle, SidebarProps>(
 
           {/* Heading */}
           <div className="mt-0">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold leading-[1.2] lg:leading-[1.15] tracking-tight text-white">
+            <h1 className="text-[28px] sm:text-[32px] lg:text-4xl font-semibold leading-[1.18] sm:leading-[1.15] tracking-tight text-white">
               <span
                 ref={titleTextRef}
                 className="inline-block transition-opacity duration-300"
@@ -153,7 +153,7 @@ export const Sidebar = forwardRef<SidebarHandle, SidebarProps>(
                 transition={showSecondary
                   ? { duration: 0 }
                   : { duration: 0.5, ease: 'easeOut', delay: 0.08 }}
-                className="text-white/60 font-medium block sm:inline-block sm:ml-2 lg:ml-0 lg:block mt-1 sm:mt-0"
+                className="text-white/60 font-medium block mt-1 sm:mt-1.5"
               >
                 Product Designer &amp; Builder.
               </motion.span>
@@ -167,30 +167,30 @@ export const Sidebar = forwardRef<SidebarHandle, SidebarProps>(
             transition={showSecondary
               ? { duration: 0 }
               : { duration: 0.5, ease: 'easeOut', delay: 0.14 }}
-            className="text-sm sm:text-base font-medium text-white/60 leading-relaxed max-w-sm mt-3 sm:mt-4"
+            className="text-[15px] sm:text-base font-normal text-white/60 leading-[1.6] max-w-sm mt-3.5 sm:mt-4"
           >
             3+ years of experience in designing products at fast-paced, high-ownership startups—from MVP to Growth.
           </motion.p>
 
-          {/* CTA + Mobile Image Row */}
-          <div className="flex items-end justify-between pt-0 relative overflow-visible mt-8">
+          {/* CTA + Mobile Image Row (Image rests right on the bottom border line) */}
+          <div className="flex items-end justify-between pt-0 relative overflow-visible mt-6 sm:mt-8">
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: showSecondary ? 1 : 0, y: showSecondary ? 0 : 12 }}
               transition={showSecondary
                 ? { duration: 0 }
                 : { duration: 0.5, ease: 'easeOut', delay: 0.2 }}
-              className="flex flex-col gap-3 shrink-0 z-10"
+              className="flex flex-col gap-2.5 shrink-0 z-10 pb-4 sm:pb-5"
             >
               <LetsTalkButton />
 
-              <div className="flex items-center gap-2 mt-1">
+              <div className="flex items-center gap-2 mt-0.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                <span className="text-sm font-medium text-emerald-400/80">Open for work</span>
+                <span className="text-xs sm:text-sm font-medium text-emerald-400/90">Open for work</span>
               </div>
             </motion.div>
 
-            {/* Mobile-only: meworking.png to the right of CTA (no right/bottom padding inset) */}
+            {/* Mobile-only: meworking.png resting right on the bottom line */}
             <div className="lg:hidden overflow-hidden pointer-events-none select-none -mr-4 sm:-mr-6 shrink-0">
               <motion.div
                 initial={{ opacity: 0, y: 50 }}
@@ -201,7 +201,7 @@ export const Sidebar = forwardRef<SidebarHandle, SidebarProps>(
                 <img
                   src="/meworking.png"
                   alt="Abhishek working"
-                  className="w-36 sm:w-44 h-auto object-contain object-right-bottom -mb-4 pointer-events-none block"
+                  className="w-[155px] sm:w-[185px] h-auto object-contain object-right-bottom -mb-[2px] pointer-events-none block"
                 />
               </motion.div>
             </div>

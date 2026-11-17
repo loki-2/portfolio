@@ -5,7 +5,7 @@ import { LetsTalkButton } from './LetsTalkButton';
 
 export const FooterCTA: React.FC = () => {
   const cardRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(cardRef, { amount: 0.35, once: false });
+  const isInView = useInView(cardRef, { amount: 0.15, once: true });
   const [isHovered, setIsHovered] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 

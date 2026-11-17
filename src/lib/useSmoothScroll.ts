@@ -14,7 +14,7 @@ export function useSmoothScroll({ wrapperRef, duration = 1.2 }: UseSmoothScrollO
     const wrapperEl = wrapperRef?.current;
 
     // Use wrapper element if provided and appropriate for current viewport
-    const targetWrapper = wrapperEl && (isDesktop || wrapperEl.classList.contains('h-screen'))
+    const targetWrapper = wrapperEl && (isDesktop || wrapperEl.classList.contains('h-screen') || wrapperEl.classList.contains('h-[100dvh]'))
       ? wrapperEl
       : window;
 
@@ -32,11 +32,31 @@ export function useSmoothScroll({ wrapperRef, duration = 1.2 }: UseSmoothScrollO
       smoothWheel: true,
       syncTouch: false, // preserve fast, native responsive touch momentum on mobile
       autoRaf: true,
+      autoResize: true,
     });
 
     lenisRef.current = lenis;
 
+    // Continuously monitor content dimensions so Lenis never clamps scroll prematurely
+    const resizeObserver = new ResizeObserver(() => {
+      lenis.resize();
+    });
+
+    if (targetContent instanceof HTMLElement) {
+      resizeObserver.observe(targetContent);
+    }
+    if (targetWrapper instanceof HTMLElement && targetWrapper !== targetContent) {
+      resizeObserver.observe(targetWrapper);
+    }
+
+    const handleResize = () => lenis.resize();
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('load', handleResize);
+
     return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('load', handleResize);
       lenis.destroy();
       lenisRef.current = null;
     };

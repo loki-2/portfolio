@@ -636,10 +636,17 @@ export const ContentArea: React.FC = () => {
   }, []);
 
   return (
-    <main className="flex-1 min-w-0 w-full max-w-full pb-4 pt-4 lg:pt-8 px-4 sm:px-6 flex flex-col gap-5 lg:gap-6 relative min-h-full">
+    <main className="flex-1 min-w-0 w-full max-w-full pb-12 sm:pb-16 lg:pb-8 pt-5 sm:pt-6 lg:pt-8 px-4 sm:px-6 flex flex-col gap-5 lg:gap-6 relative min-h-full">
       <div className="flex flex-col gap-5 lg:gap-6 relative z-10 w-full">
         {/* WORK SECTION */}
-        <section id="work" className="scroll-mt-10 flex flex-col gap-8 relative z-10">
+        <section id="work" className="scroll-mt-6 lg:scroll-mt-10 flex flex-col gap-4 sm:gap-6 lg:gap-8 relative z-10">
+          {/* Mobile-only "Projects" section heading */}
+          <div className="lg:hidden pb-1 sm:pb-2">
+            <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight">
+              Projects
+            </h2>
+          </div>
+
           {error && (
             <div className="flex items-center justify-center py-16">
               <p className="text-sm text-white/40">Couldn't load projects: {error}</p>
@@ -656,7 +663,7 @@ export const ContentArea: React.FC = () => {
 
           {/* ── Mobile Project Card Variants in 2-Col Grid ── */}
           {!error && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
               {/* Slot 1: Third project card ("Designing for Human-AI Collaboration") */}
               {(() => {
                 const thirdProject = workItems[2] || DEFAULT_WORK_ITEMS[2];
@@ -698,50 +705,86 @@ export const ContentArea: React.FC = () => {
           id="experience"
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
+          viewport={{ once: true, amount: 0.1 }}
           transition={{ duration: 0.55, ease: [0.21, 0.47, 0.32, 0.98] }}
           className="scroll-mt-10 relative z-10"
         >
           <div className="bg-[#111214] rounded-xl p-5 sm:p-7 lg:p-12 flex flex-col lg:flex-row gap-6 sm:gap-8 lg:gap-16">
 
-            {/* Left: Title & Resume */}
+            {/* Left: Title (and Desktop-only Resume) */}
             <div className="w-full lg:w-[33%] flex flex-col justify-between gap-6 sm:gap-8 lg:gap-12 shrink-0">
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-white tracking-tight">Experience</h2>
 
-              <a
-                href="https://drive.google.com/drive/folders/1mEdpp-eo9aFGIEU8GDJ-iVe6l2pwTr_z?usp=drive_link"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block rounded-2xl overflow-hidden relative group cursor-pointer no-underline h-[140px] border-[2px] border-white/20"
-              >
-                {/* Resume image */}
-                <img
-                  src="/resume.png"
-                  alt="Resume"
-                  className="w-full h-full object-cover object-top"
-                />
+              {/* Desktop-only: Resume card in left column */}
+              <div className="hidden lg:block">
+                <a
+                  href="https://drive.google.com/drive/folders/1mEdpp-eo9aFGIEU8GDJ-iVe6l2pwTr_z?usp=drive_link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block rounded-2xl overflow-hidden relative group cursor-pointer no-underline h-[140px] border-[2px] border-white/20"
+                >
+                  {/* Resume image */}
+                  <img
+                    src="/resume.png"
+                    alt="Resume"
+                    className="w-full h-full object-cover object-top"
+                  />
 
-                {/* Black gradient overlay - full height */}
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background: 'linear-gradient(to top, rgba(0,0,0,0.70) 0%, rgba(0,0,0,0.2) 100%)',
-                  }}
-                />
+                  {/* Black gradient overlay - full height */}
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background: 'linear-gradient(to top, rgba(0,0,0,0.70) 0%, rgba(0,0,0,0.2) 100%)',
+                    }}
+                  />
 
-                {/* Text + icon at bottom */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 flex items-center justify-between">
-                  <span className="text-sm font-bold text-white">Resume</span>
-                  <div className="w-6 h-6 rounded-full bg-white text-black flex items-center justify-center group-hover:scale-110 transition-all duration-300">
-                    <ArrowRight size={12} strokeWidth={3} className="transition-transform duration-300 group-hover:-rotate-45" />
+                  {/* Text + icon at bottom */}
+                  <div className="absolute bottom-0 left-0 right-0 p-4 flex items-center justify-between">
+                    <span className="text-sm font-bold text-white">Resume</span>
+                    <div className="w-6 h-6 rounded-full bg-white text-black flex items-center justify-center group-hover:scale-110 transition-all duration-300">
+                      <ArrowRight size={12} strokeWidth={3} className="transition-transform duration-300 group-hover:-rotate-45" />
+                    </div>
                   </div>
-                </div>
-              </a>
+                </a>
+              </div>
             </div>
 
-            {/* Right: Experience Folder */}
-            <div className="w-full lg:w-[67%] flex flex-col justify-center">
+            {/* Right: Experience Folder (and Mobile-only Resume below it) */}
+            <div className="w-full lg:w-[67%] flex flex-col justify-center gap-6 sm:gap-8">
               <ExperienceFolder />
+
+              {/* Mobile-only: Resume card placed down below the experience folder */}
+              <div className="block lg:hidden mt-2">
+                <a
+                  href="https://drive.google.com/drive/folders/1mEdpp-eo9aFGIEU8GDJ-iVe6l2pwTr_z?usp=drive_link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block rounded-2xl overflow-hidden relative group cursor-pointer no-underline h-[140px] border-[2px] border-white/20"
+                >
+                  {/* Resume image */}
+                  <img
+                    src="/resume.png"
+                    alt="Resume"
+                    className="w-full h-full object-cover object-top"
+                  />
+
+                  {/* Black gradient overlay - full height */}
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background: 'linear-gradient(to top, rgba(0,0,0,0.70) 0%, rgba(0,0,0,0.2) 100%)',
+                    }}
+                  />
+
+                  {/* Text + icon at bottom */}
+                  <div className="absolute bottom-0 left-0 right-0 p-4 flex items-center justify-between">
+                    <span className="text-sm font-bold text-white">Resume</span>
+                    <div className="w-6 h-6 rounded-full bg-white text-black flex items-center justify-center group-hover:scale-110 transition-all duration-300">
+                      <ArrowRight size={12} strokeWidth={3} className="transition-transform duration-300 group-hover:-rotate-45" />
+                    </div>
+                  </div>
+                </a>
+              </div>
             </div>
 
           </div>
@@ -752,7 +795,7 @@ export const ContentArea: React.FC = () => {
           id="ai"
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
+          viewport={{ once: true, amount: 0.1 }}
           transition={{ duration: 0.55, ease: [0.21, 0.47, 0.32, 0.98] }}
           className="scroll-mt-10 relative z-10"
         >
@@ -773,7 +816,7 @@ export const ContentArea: React.FC = () => {
                     <img src="/claudecode.png" alt="Claude Code" className="w-full h-full object-contain" />
                   </div>
                   <div className="flex flex-col gap-1.5 sm:gap-2 min-w-0">
-                    <h3 className="text-lg sm:text-xl font-medium text-white">Shipping production</h3>
+                    <h3 className="text-lg sm:text-xl font-medium text-white">Shipping to production</h3>
                     <p className="text-sm sm:text-base text-white/60 leading-relaxed">
                       I use Claude Code at work to implement frontend UI fixes, polish motion interactions, and ship to production, enabling faster feedback cycles.
                     </p>
@@ -901,7 +944,7 @@ export const ContentArea: React.FC = () => {
           id="about"
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
+          viewport={{ once: true, amount: 0.1 }}
           transition={{ duration: 0.55, ease: [0.21, 0.47, 0.32, 0.98] }}
           className="scroll-mt-10 relative z-10"
         >
@@ -912,7 +955,7 @@ export const ContentArea: React.FC = () => {
         <motion.section
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
+          viewport={{ once: true, amount: 0.05 }}
           transition={{ duration: 0.55, ease: [0.21, 0.47, 0.32, 0.98] }}
           className="mb-6 relative z-20"
         >

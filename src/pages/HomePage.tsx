@@ -203,26 +203,28 @@ export function HomePage() {
       {/* ── MAIN LAYOUT ──────────────────────────────────────────────────────── */}
       <div
         ref={contentRef}
-        className="flex flex-col lg:flex-row h-screen overflow-y-auto overflow-x-hidden scroll-smooth"
+        className="h-[100dvh] lg:h-screen overflow-y-auto overflow-x-hidden scroll-smooth"
       >
-        <Sidebar
-          ref={sidebarRef}
-          activeSection={activeSection}
-          scrollToSection={scrollToSection}
-          showSecondary={showSecondary}
-          isSettled={isSettled}
-          phase={phase}
-        />
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: showSecondary ? 1 : 0, y: showSecondary ? 0 : 16 }}
-          transition={hasSeenIntro
-            ? { duration: 0 }
-            : { duration: 0.6, ease: 'easeOut', delay: 0.15 }}
-          className="flex-1 min-w-0"
-        >
-          <ContentArea />
-        </motion.div>
+        <div className="flex flex-col lg:flex-row min-h-full w-full">
+          <Sidebar
+            ref={sidebarRef}
+            activeSection={activeSection}
+            scrollToSection={scrollToSection}
+            showSecondary={showSecondary}
+            isSettled={isSettled}
+            phase={phase}
+          />
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: showSecondary ? 1 : 0, y: showSecondary ? 0 : 16 }}
+            transition={hasSeenIntro
+              ? { duration: 0 }
+              : { duration: 0.6, ease: 'easeOut', delay: 0.15 }}
+            className="flex-1 min-w-0"
+          >
+            <ContentArea />
+          </motion.div>
+        </div>
       </div>
 
     </div>

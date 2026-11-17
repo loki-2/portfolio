@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 
@@ -46,6 +47,17 @@ export const ExperienceFolder: React.FC = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // Lock body scroll when modal overlay is active on mobile/desktop
+  useEffect(() => {
+    if (selectedMobileExp) {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prevOverflow;
+      };
+    }
+  }, [selectedMobileExp]);
 
   return (
     <>
@@ -210,73 +222,107 @@ export const ExperienceFolder: React.FC = () => {
         </div>
       </div>
 
-      {/* 4. MOBILE / CLICK EXPAND OVERLAY MODAL */}
-      <AnimatePresence>
-        {selectedMobileExp && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={() => setSelectedMobileExp(null)}
-            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
-          >
-            <motion.div
-              initial={{ y: 60, opacity: 0, scale: 0.95 }}
-              animate={{ y: 0, opacity: 1, scale: 1 }}
-              exit={{ y: 40, opacity: 0, scale: 0.95 }}
-              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-lg rounded-2xl p-6 sm:p-8 flex flex-col gap-4"
-              style={{
-                background:
-                  selectedMobileExp.id === 'dashwave'
-                    ? 'linear-gradient(145deg, #172238 0%, #121929 50%, #101218 100%)'
-                    : 'linear-gradient(145deg, #242617 0%, #1C1E12 50%, #101218 100%)',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)',
-              }}
-            >
-              {/* Close (X) cross button */}
-              <button
+      {/* 4. MOBILE / CLICK EXPAND OVERLAY MODAL (Portaled to document.body to avoid parent CSS transform trapping) */}
+      {typeof document !== 'undefined' &&
+        createPortal(
+          <AnimatePresence>
+            {selectedMobileExp && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
                 onClick={() => setSelectedMobileExp(null)}
-                aria-label="Close"
-                className="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 active:scale-95 text-white/70 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                onTouchMove={(e) => e.preventDefault()}
+                className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 overscroll-none touch-none"
               >
-                <X size={16} />
-              </button>
+                <motion.div
+                  initial={{ y: 40, opacity: 0, scale: 0.96 }}
+                  animate={{ y: 0, opacity: 1, scale: 1 }}
+                  exit={{ y: 30, opacity: 0, scale: 0.96 }}
+                  transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+                  onClick={(e) => e.stopPropagation()}
+                  onTouchMove={(e) => e.stopPropagation()}
+                  className="relative w-full max-w-md rounded-2xl p-5 sm:p-7 flex flex-col gap-4 touch-auto border border-white/10"
+                  style={{
+                    background:
+                      selectedMobileExp.id === 'dashwave'
+                        ? 'linear-gradient(150deg, #18253d 0%, #111726 55%, #0d1017 100%)'
+                        : 'linear-gradient(150deg, #272a15 0%, #1a1c11 55%, #0f110c 100%)',
+                    boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.85)',
+                  }}
+                >
+                  {/* Top Bar: Logo on left, (X) Close button on right */}
+                  <div className="flex items-center justify-between">
+                    <div className="w-12 h-12 rounded-[12px] bg-white/[0.08] p-1.5 flex items-center justify-center shrink-0 border border-white/10 shadow-sm">
+                      <img
+                        src={selectedMobileExp.image}
+                        alt={selectedMobileExp.company}
+                        className="w-full h-full object-contain rounded-[8px]"
+                      />
+                    </div>
 
-              {/* Header: Logo, Title, Period, Company */}
-              <div className="flex items-start gap-3.5 pr-8">
-                <div className="w-11 h-11 rounded-[8px] bg-white/5 p-1 flex items-center justify-center shrink-0">
-                  <img
-                    src={selectedMobileExp.image}
-                    alt={selectedMobileExp.company}
-                    className="w-full h-full object-contain rounded-[6px]"
-                  />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-base sm:text-lg font-semibold text-white tracking-tight">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedMobileExp(null)}
+                      aria-label="Close"
+                      className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 text-white/80 hover:text-white flex items-center justify-center transition-all cursor-pointer border border-white/10"
+                    >
+                      <X size={16} strokeWidth={2.5} />
+                    </button>
+                  </div>
+
+                  {/* Role Title & Metadata */}
+                  <div className="flex flex-col gap-1.5 pt-1">
+                    <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
                       {selectedMobileExp.role}
                     </h3>
-                    <span className="text-xs text-white/50 font-mono shrink-0">
-                      {selectedMobileExp.period}
-                    </span>
-                  </div>
-                  <p className="text-xs sm:text-sm text-white/55 font-medium mt-0.5">
-                    {selectedMobileExp.company}
-                  </p>
-                </div>
-              </div>
 
-              {/* Summary */}
-              <p className="text-xs sm:text-sm text-white/70 leading-relaxed font-normal pt-1">
-                {selectedMobileExp.summary}
-              </p>
-            </motion.div>
-          </motion.div>
+                    <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-white/60">
+                      <span className="font-semibold text-white/90">
+                        {selectedMobileExp.company}
+                      </span>
+                      <span className="text-white/30">•</span>
+                      <span className="font-mono text-white/50 tracking-wide text-xs">
+                        {selectedMobileExp.period}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Subtle Divider */}
+                  <div className="w-full h-px bg-white/[0.08] my-0.5" />
+
+                  {/* Summary */}
+                  <p className="text-sm text-white/75 leading-relaxed font-normal">
+                    {selectedMobileExp.summary}
+                  </p>
+
+                  {/* Switcher tabs between experiences */}
+                  <div className="flex items-center gap-2 pt-2 border-t border-white/[0.08] mt-1">
+                    <span className="text-[11px] uppercase tracking-wider text-white/40 font-semibold mr-1">
+                      View:
+                    </span>
+                    {EXPERIENCES.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setSelectedMobileExp(item)}
+                        className={`text-xs px-3 py-1.5 rounded-full font-medium transition-all cursor-pointer ${
+                          selectedMobileExp.id === item.id
+                            ? 'bg-white text-black font-semibold shadow-sm'
+                            : 'text-white/50 hover:text-white bg-white/5 hover:bg-white/10 border border-white/[0.06]'
+                        }`}
+                      >
+                        {item.company.split(' · ')[0]}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>
     </>
   );
 };
