@@ -13,6 +13,7 @@ interface SidebarProps {
   showSecondary?: boolean;
   isSettled?: boolean;
   phase?: 'intro' | 'moving' | 'settled' | 'done';
+  isScrolled?: boolean;
 }
 
 const navItems = [
@@ -22,7 +23,7 @@ const navItems = [
 ];
 
 export const Sidebar = forwardRef<SidebarHandle, SidebarProps>(
-  ({ activeSection, scrollToSection, showSecondary = true, isSettled = true, phase = 'done' }, ref) => {
+  ({ activeSection, scrollToSection, showSecondary = true, isSettled = true, phase = 'done', isScrolled = false }, ref) => {
     const desktopAvatarRef = useRef<HTMLDivElement>(null);
     const mobileAvatarRef = useRef<HTMLDivElement>(null);
     const titleTextRef = useRef<HTMLSpanElement>(null);
@@ -54,16 +55,23 @@ export const Sidebar = forwardRef<SidebarHandle, SidebarProps>(
     }));
 
     return (
-      <aside className="w-full lg:w-[400px] shrink-0 flex flex-col lg:justify-between lg:h-screen lg:sticky top-0 pt-6 lg:pt-10 pb-0 lg:pb-0 px-4 sm:px-6 lg:px-10 gap-0 border-b lg:border-b-0 border-white/[0.08] bg-transparent z-10 overflow-hidden">
+      <aside className="w-full lg:w-[400px] shrink-0 flex flex-col lg:justify-between lg:h-screen lg:sticky top-0 pt-0 lg:pt-10 pb-0 lg:pb-0 px-4 sm:px-6 lg:px-10 gap-0 bg-transparent z-10 overflow-hidden relative">
 
         {/* TOP SECTION */}
         <div className="flex flex-col gap-0">
 
-          {/* Mobile: Avatar + Nav row */}
-          <div className="mb-6 sm:mb-7 flex justify-between items-center lg:hidden">
+          {/* Mobile Fixed Top Header (sticks to top with smooth background blur transition when scrolled) */}
+          <div
+            className={`fixed top-0 left-0 right-0 z-40 lg:hidden px-4 sm:px-6 py-3 sm:py-3.5 flex justify-between items-center transition-all duration-300 ease-out ${
+              isScrolled
+                ? 'bg-[#0b0c0e]/85 backdrop-blur-md border-b border-white/[0.08] shadow-lg shadow-black/40'
+                : 'bg-transparent border-b border-transparent'
+            }`}
+          >
             <div
               ref={mobileAvatarRef}
-              className="w-10 h-10 border border-white/10 rounded-full overflow-hidden bg-white/10 shrink-0"
+              className="w-10 h-10 border border-white/10 rounded-full overflow-hidden bg-white/10 shrink-0 cursor-pointer"
+              onClick={() => scrollToSection('work')}
               style={{
                 opacity: isSettled ? 1 : 0,
                 filter: isSettled ? 'blur(0px)' : 'blur(12px)',
@@ -79,19 +87,28 @@ export const Sidebar = forwardRef<SidebarHandle, SidebarProps>(
               transition={showSecondary
                 ? { duration: 0 }
                 : { duration: 0.5, ease: 'easeOut', delay: 0.1 }}
-              className="flex items-center gap-2.5 sm:gap-4 bg-white/5 border border-white/10 rounded-full px-3.5 sm:px-5 py-1.5 sm:py-2.5"
+              className={`flex items-center gap-2.5 sm:gap-4 border rounded-full px-3.5 sm:px-5 py-1.5 sm:py-2 transition-all duration-300 ${
+                isScrolled
+                  ? 'bg-white/10 border-white/15'
+                  : 'bg-white/5 border-white/10'
+              }`}
             >
               {navItems.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => scrollToSection(item.id)}
-                  className={`text-xs sm:text-sm font-medium transition-colors ${activeSection === item.id ? 'text-white' : 'text-white/50 hover:text-white/80'}`}
+                  className={`text-xs sm:text-sm font-medium transition-colors cursor-pointer ${
+                    activeSection === item.id ? 'text-white' : 'text-white/50 hover:text-white/80'
+                  }`}
                 >
                   {item.label}
                 </button>
               ))}
             </motion.nav>
           </div>
+
+          {/* Spacer so mobile content starts cleanly below the fixed header */}
+          <div className="h-16 sm:h-20 lg:hidden" />
 
           {/* Desktop: Avatar with vertical roll transition (no blur filter) */}
           <div
@@ -207,6 +224,14 @@ export const Sidebar = forwardRef<SidebarHandle, SidebarProps>(
             </div>
           </div>
         </div>
+
+        {/* Mobile divider below hero section — edge-to-edge, only fades in when showSecondary is true */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: showSecondary ? 1 : 0 }}
+          transition={showSecondary ? { duration: 0.5, ease: 'easeOut', delay: 0.2 } : { duration: 0 }}
+          className="lg:hidden -mx-4 sm:-mx-6 w-[calc(100%+2rem)] sm:w-[calc(100%+3rem)] h-px bg-white/[0.08] pointer-events-none shrink-0"
+        />
 
         {/* BOTTOM — Desktop Footer Image (No left/bottom padding inset, flush to bottom left) */}
         <div className="hidden lg:block mt-auto overflow-hidden pointer-events-none select-none -ml-10 -mr-10">

@@ -639,7 +639,7 @@ export const ContentArea: React.FC = () => {
     <main className="flex-1 min-w-0 w-full max-w-full pb-12 sm:pb-16 lg:pb-8 pt-5 sm:pt-6 lg:pt-8 px-4 sm:px-6 flex flex-col gap-5 lg:gap-6 relative min-h-full">
       <div className="flex flex-col gap-5 lg:gap-6 relative z-10 w-full">
         {/* WORK SECTION */}
-        <section id="work" className="scroll-mt-6 lg:scroll-mt-10 flex flex-col gap-4 sm:gap-6 lg:gap-8 relative z-10">
+        <section id="work" className="scroll-mt-16 sm:scroll-mt-20 lg:scroll-mt-10 flex flex-col gap-4 sm:gap-6 lg:gap-8 relative z-10">
           {/* Mobile-only "Projects" section heading */}
           <div className="lg:hidden pb-1 sm:pb-2">
             <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight">
@@ -707,7 +707,7 @@ export const ContentArea: React.FC = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.1 }}
           transition={{ duration: 0.55, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="scroll-mt-10 relative z-10"
+          className="scroll-mt-16 sm:scroll-mt-20 lg:scroll-mt-10 relative z-10"
         >
           <div className="bg-[#111214] rounded-xl p-5 sm:p-7 lg:p-12 flex flex-col lg:flex-row gap-6 sm:gap-8 lg:gap-16">
 
@@ -797,7 +797,7 @@ export const ContentArea: React.FC = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.1 }}
           transition={{ duration: 0.55, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="scroll-mt-10 relative z-10"
+          className="scroll-mt-16 sm:scroll-mt-20 lg:scroll-mt-10 relative z-10"
         >
           <div className="bg-[#111214] rounded-xl p-5 sm:p-7 lg:p-12 flex flex-col lg:flex-row gap-6 sm:gap-8 lg:gap-16">
 
@@ -946,7 +946,7 @@ export const ContentArea: React.FC = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.1 }}
           transition={{ duration: 0.55, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="scroll-mt-10 relative z-10"
+          className="scroll-mt-16 sm:scroll-mt-20 lg:scroll-mt-10 relative z-10"
         >
           <AboutSection />
         </motion.section>

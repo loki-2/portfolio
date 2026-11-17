@@ -16,6 +16,7 @@ export function HomePage() {
     hasSeenIntro ? 'done' : 'intro'
   );
   const [activeSection, setActiveSection] = useState<string>('work');
+  const [isScrolled, setIsScrolled] = useState<boolean>(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<SidebarHandle>(null);
 
@@ -91,11 +92,13 @@ export function HomePage() {
     };
   }, [hasSeenIntro]);
 
-  // Scroll section tracking
+  // Scroll section tracking & sticky mobile header scroll detection
   useEffect(() => {
     const content = contentRef.current;
     if (!content) return;
     const updateActive = () => {
+      setIsScrolled(content.scrollTop > 20);
+
       const sections = Array.from(content.querySelectorAll('section[id]')) as HTMLElement[];
       if (sections.length === 0) return;
       const triggerY = content.scrollTop + content.clientHeight * 0.3;
@@ -213,6 +216,7 @@ export function HomePage() {
             showSecondary={showSecondary}
             isSettled={isSettled}
             phase={phase}
+            isScrolled={isScrolled}
           />
           <motion.div
             initial={{ opacity: 0, y: 16 }}
