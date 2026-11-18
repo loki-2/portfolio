@@ -68,13 +68,20 @@ export function useSmoothScroll({ wrapperRef, duration = 1.2 }: UseSmoothScrollO
         duration: options?.duration ?? 1.2,
         offset: options?.offset ?? 0,
       });
+    } else if (typeof target === 'number') {
+      const wrapperEl = wrapperRef?.current;
+      if (wrapperEl) {
+        wrapperEl.scrollTo({ top: target, behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: target, behavior: 'smooth' });
+      }
     } else if (typeof target === 'string') {
       const el = document.querySelector(target);
       el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else if (target instanceof HTMLElement) {
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }, []);
+  }, [wrapperRef]);
 
   return { lenisRef, scrollTo };
 }

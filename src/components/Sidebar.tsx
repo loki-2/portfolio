@@ -268,7 +268,7 @@ export const Sidebar = forwardRef<SidebarHandle, SidebarProps>(
               : { duration: 0.5, ease: 'easeOut', delay: 0.14 }}
             className="text-[15px] sm:text-base font-normal text-white/60 leading-[1.6] max-w-sm mt-3.5 sm:mt-4 mx-auto lg:mx-0"
           >
-            2x Founding Product Designer at fast paced, early-stage startups — across web3 <br />fintech &amp;  b2b AI SaaS.
+            2x Founding Product Designer at fast paced, early-stage startups — across web3 <br className="sm:hidden" />fintech &amp; b2b AI SaaS.
           </motion.p>
 
           {/* CTA: Lets Talk & Open for work */}

@@ -342,10 +342,11 @@ const WorkCard: React.FC<WorkItem & { index: number }> = ({
 
   const renderArrowButton = () => (
     <motion.div
-      className="w-8 h-8 rounded-full flex items-center justify-center shadow-sm shrink-0"
+      className="w-8 h-8 rounded-full flex items-center justify-center shadow-sm shrink-0 border"
       animate={{
         scale: isHovered ? 1.1 : 1,
-        backgroundColor: isHovered ? '#ffffff' : 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: isHovered ? '#ffffff' : 'rgba(255, 255, 255, 0.03)',
+        borderColor: isHovered ? '#ffffff' : 'rgba(255, 255, 255, 0.05)',
         color: isHovered ? '#000000' : '#9c9c9c',
       }}
       transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
@@ -478,10 +479,11 @@ const MobileVariantProjectCard: React.FC<MobileVariantProjectCardProps> = ({
 
   const renderArrowButton = () => (
     <motion.div
-      className="w-8 h-8 rounded-full flex items-center justify-center shadow-sm shrink-0"
+      className="w-8 h-8 rounded-full flex items-center justify-center shadow-sm shrink-0 border"
       animate={{
         scale: isHovered ? 1.1 : 1,
-        backgroundColor: isHovered ? '#ffffff' : 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: isHovered ? '#ffffff' : 'rgba(255, 255, 255, 0.03)',
+        borderColor: isHovered ? '#ffffff' : 'rgba(255, 255, 255, 0.05)',
         color: isHovered ? '#000000' : '#9c9c9c',
       }}
       transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
@@ -721,7 +723,7 @@ export const ContentArea: React.FC = () => {
                   href="https://drive.google.com/drive/folders/1mEdpp-eo9aFGIEU8GDJ-iVe6l2pwTr_z?usp=drive_link"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block rounded-2xl overflow-hidden relative group cursor-pointer no-underline h-[140px] border-[2px] border-white/20"
+                  className="block rounded-[12px] overflow-hidden relative group cursor-pointer no-underline h-[140px] border-[2px] border-white/20"
                 >
                   {/* Resume image */}
                   <img
@@ -750,7 +752,7 @@ export const ContentArea: React.FC = () => {
             </div>
 
             {/* Right: Experience Folder (and Mobile-only Resume below it) */}
-            <div className="w-full lg:w-[67%] flex flex-col justify-center gap-6 sm:gap-8">
+            <div className="w-full lg:w-[67%] flex flex-col justify-center gap-4 sm:gap-8">
               <ExperienceFolder />
 
               {/* Mobile-only: Resume card placed down below the experience folder */}
@@ -759,7 +761,7 @@ export const ContentArea: React.FC = () => {
                   href="https://drive.google.com/drive/folders/1mEdpp-eo9aFGIEU8GDJ-iVe6l2pwTr_z?usp=drive_link"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block rounded-2xl overflow-hidden relative group cursor-pointer no-underline h-[140px] border-[2px] border-white/20"
+                  className="block rounded-[16px] overflow-hidden relative group cursor-pointer no-underline h-[140px] border-[2px] border-white/20"
                 >
                   {/* Resume image */}
                   <img
@@ -811,7 +813,7 @@ export const ContentArea: React.FC = () => {
 
               {/* Row 1: Shipping UI faster */}
               <div className="flex flex-col gap-2 pb-6 sm:pb-8 lg:pb-10 border-b border-white/5">
-                <div className="flex gap-4 sm:gap-5 lg:gap-6">
+                <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-5 lg:gap-6">
                   <div className="w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 shrink-0 overflow-hidden rounded-[12px] sm:rounded-[14px] bg-white/[0.04] border-2 border-white/10 flex items-center justify-center">
                     <img src="/claudecode.png" alt="Claude Code" className="w-full h-full object-contain" />
                   </div>
@@ -822,7 +824,7 @@ export const ContentArea: React.FC = () => {
                     </p>
                   </div>
                 </div>
-                <div className="mt-4 rounded-xl bg-white/[0.02] border border-white/[0.06] overflow-hidden">
+                <div className="mt-4 rounded-[12px] bg-white/[0.02] border border-white/[0.06] overflow-hidden">
                   <img
                     src="/github.png"
                     alt="GitHub Contributions"
@@ -833,7 +835,7 @@ export const ContentArea: React.FC = () => {
 
               {/* Row 2: Building full-stack projects */}
               <div className="flex flex-col gap-2 pb-6 sm:pb-8 lg:pb-10 border-b border-white/5">
-                <div className="flex gap-4 sm:gap-5 lg:gap-6">
+                <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-5 lg:gap-6">
                   <div className="w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 shrink-0 overflow-hidden rounded-[12px] sm:rounded-[14px] bg-white/[0.04] border-2 border-white/10 flex items-center justify-center">
                     <img src="/cursor.png" alt="Cursor" className="w-full h-full object-contain" />
                   </div>
@@ -845,21 +847,21 @@ export const ContentArea: React.FC = () => {
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
-                  <div className="aspect-[16/9] rounded-[10px] bg-white/[0.02] border border-white/[0.08] overflow-hidden group">
+                  <div className="aspect-[16/9] rounded-[12px] bg-white/[0.02] border border-white/[0.08] overflow-hidden group">
                     <img
                       src="/sideprojects/1.png"
                       alt="Side project 1"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>
-                  <div className="aspect-[16/9] rounded-[10px] bg-white/[0.02] border border-white/[0.08] overflow-hidden group">
+                  <div className="aspect-[16/9] rounded-[12px] bg-white/[0.02] border border-white/[0.08] overflow-hidden group">
                     <img
                       src="/sideprojects/2.png"
                       alt="Side project 2"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>
-                  <div className="aspect-[16/9] rounded-[10px] bg-white/[0.02] border border-white/[0.08] overflow-hidden group">
+                  <div className="aspect-[16/9] rounded-[12px] bg-white/[0.02] border border-white/[0.08] overflow-hidden group">
                     <img
                       src="/sideprojects/3.png"
                       alt="Side project 3"
@@ -871,7 +873,7 @@ export const ContentArea: React.FC = () => {
 
               {/* Row 3: Generating visual assets */}
               <div className="flex flex-col gap-2 pb-6 sm:pb-8 lg:pb-10">
-                <div className="flex gap-4 sm:gap-5 lg:gap-6">
+                <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-5 lg:gap-6">
                   <div className="w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 shrink-0 overflow-hidden rounded-[12px] sm:rounded-[14px] bg-white/[0.04] border-2 border-white/10 flex items-center justify-center">
                     <img src="/gemini.png" alt="Gemini" className="w-full h-full object-contain" />
                   </div>

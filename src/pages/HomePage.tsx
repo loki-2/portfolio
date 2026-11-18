@@ -135,10 +135,10 @@ export function HomePage() {
     isManualScrollingRef.current = true;
     manualScrollTimerRef.current = setTimeout(() => {
       isManualScrollingRef.current = false;
-    }, 900);
+    }, 1000);
 
     if (sectionId === 'work' || sectionId === 'home') {
-      contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollTo(0);
       return;
     }
     const el = contentRef.current?.querySelector(`#${sectionId}`);

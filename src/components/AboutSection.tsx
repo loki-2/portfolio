@@ -1414,40 +1414,43 @@ export const AboutSection: React.FC = () => {
     <div className="bg-[#111214] rounded-xl p-5 sm:p-7 lg:p-12 flex flex-col gap-6 sm:gap-8 lg:gap-10">
       <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-white tracking-tight">About</h2>
 
-      {/* Row 1: Photo carousel (left) + [3 paragraphs + Weather & Time] (right) */}
-      <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-        {/* Left: Photo carousel */}
-        <div className="w-full lg:w-[38%] shrink-0">
-          <PhotoCarousel />
-        </div>
-
-        {/* Right: 3 paragraphs + below them Weather and Time widgets */}
-        <div className="w-full lg:flex-1 flex flex-col justify-between gap-6">
-          {/* 3 Plain paragraphs */}
-          <div className="flex flex-col gap-4 text-sm lg:text-[15px] text-white/70 leading-relaxed pt-1">
-            <p>
-              I enjoy turning ideas into products, launching personal projects and learning by building.
-            </p>
-            <p>
-              I share my learnings on LinkedIn about product design, AI, startups, and the lessons I pick up while building.
-            </p>
-            <p>
-              When I'm not designing, you'll usually find me playing football or listening to music.
-            </p>
+      {/* Bento Grid Container */}
+      <div className="flex flex-col gap-5 lg:gap-6">
+        {/* Row 1: Photo carousel (left) + [3 paragraphs + Weather & Time] (right) */}
+        <div className="flex flex-col lg:flex-row gap-5 lg:gap-6">
+          {/* Left: Photo carousel */}
+          <div className="w-full lg:w-[38%] shrink-0">
+            <PhotoCarousel />
           </div>
 
-          {/* Below 3 paras: Weather + Location/Time (compact clock card) */}
-          <div className="grid grid-cols-1 sm:grid-cols-[1.5fr_1fr] gap-4 pt-2">
-            <WeatherWidget />
-            <LocationTimeWidget />
+          {/* Right: 3 paragraphs + below them Weather and Time widgets */}
+          <div className="w-full lg:flex-1 flex flex-col justify-between gap-5 lg:gap-6">
+            {/* 3 Plain paragraphs */}
+            <div className="flex flex-col gap-4 text-sm lg:text-[15px] text-white/70 leading-relaxed pt-1">
+              <p>
+                I enjoy turning ideas into products, launching personal projects and learning by building.
+              </p>
+              <p>
+                I share my learnings on LinkedIn about product design, AI, startups, and the lessons I pick up while building.
+              </p>
+              <p>
+                When I'm not designing, you'll usually find me playing football or listening to music.
+              </p>
+            </div>
+
+            {/* Below 3 paras: Weather + Location/Time (compact clock card) */}
+            <div className="grid grid-cols-1 sm:grid-cols-[1.5fr_1fr] gap-5 lg:gap-6">
+              <WeatherWidget />
+              <LocationTimeWidget />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Row 2: Vibing to (Music Player with CD) + Books (side-by-side) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <MusicPlayerCard />
-        <BooksCarousel />
+        {/* Row 2: Vibing to (Music Player with CD) + Books (side-by-side) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 lg:gap-6">
+          <MusicPlayerCard />
+          <BooksCarousel />
+        </div>
       </div>
     </div>
   );

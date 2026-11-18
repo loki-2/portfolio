@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useInView } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 import { Mail } from 'lucide-react';
 import { LetsTalkButton } from './LetsTalkButton';
 
 export const FooterCTA: React.FC = () => {
   const cardRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(cardRef, { amount: 0.15, once: true });
+  const isInView = useInView(cardRef, { amount: 0.15 });
   const [isHovered, setIsHovered] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -18,8 +18,6 @@ export const FooterCTA: React.FC = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const showImage = isHovered || (isMobile && isInView);
-
   return (
     <div
       ref={cardRef}
@@ -28,18 +26,42 @@ export const FooterCTA: React.FC = () => {
       className="relative w-full group"
     >
       {/* Memoji avatar rising from behind the back of this section towards the top right, overlapping above the section before it */}
-      <div
-        className={`absolute -top-22 sm:-top-28 lg:-top-32 right-0 sm:right-12 lg:right-8 z-10 pointer-events-none select-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${showImage
-          ? 'translate-y-0 opacity-100 scale-100'
-          : 'translate-y-28 sm:translate-y-36 opacity-0 scale-90'
-          }`}
+      <motion.div
+        className="absolute -top-22 sm:-top-28 lg:-top-32 right-0 sm:right-12 lg:right-8 z-10 pointer-events-none select-none"
+        initial={false}
+        animate={
+          isMobile
+            ? isInView
+              ? {
+                  y: [110, 0, 0, 110, 110],
+                  opacity: 1,
+                  scale: 1,
+                }
+              : { y: 110, opacity: 1, scale: 1 }
+            : isHovered
+              ? { y: 0, opacity: 1, scale: 1 }
+              : { y: 110, opacity: 0, scale: 0.9 }
+        }
+        transition={
+          isMobile && isInView
+            ? {
+                duration: 3,
+                repeat: Infinity,
+                ease: 'easeInOut',
+                times: [0, 0.25, 0.65, 0.9, 1],
+              }
+            : {
+                duration: 0.5,
+                ease: [0.16, 1, 0.3, 1],
+              }
+        }
       >
         <img
           src="/footer.png"
           alt="Abhishek waving"
           className="w-28 h-28 sm:w-32 sm:h-32 lg:w-36 lg:h-36 object-contain object-bottom drop-shadow-2xl"
         />
-      </div>
+      </motion.div>
 
       {/* Main CTA Card in front of image lower body (z-20) */}
       <div className="w-full rounded-2xl p-5 sm:p-8 lg:p-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 lg:gap-8 relative z-20 overflow-hidden bg-gradient-to-br from-[#0F3F2D] to-[#0A261B] border border-emerald-500/20 shadow-lg transition-all duration-300">
