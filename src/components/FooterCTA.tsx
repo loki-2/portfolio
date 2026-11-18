@@ -29,9 +29,9 @@ export const FooterCTA: React.FC = () => {
     >
       {/* Memoji avatar rising from behind the back of this section towards the top right, overlapping above the section before it */}
       <div
-        className={`absolute -top-20 sm:-top-24 lg:-top-28 right-8 sm:right-12 lg:right-8 z-10 pointer-events-none select-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${showImage
-            ? 'translate-y-0 opacity-100 scale-100'
-            : 'translate-y-28 sm:translate-y-36 opacity-0 scale-90'
+        className={`absolute -top-22 sm:-top-28 lg:-top-32 right-0 sm:right-12 lg:right-8 z-10 pointer-events-none select-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${showImage
+          ? 'translate-y-0 opacity-100 scale-100'
+          : 'translate-y-28 sm:translate-y-36 opacity-0 scale-90'
           }`}
       >
         <img

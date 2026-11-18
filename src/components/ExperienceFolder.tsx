@@ -252,24 +252,23 @@ export const ExperienceFolder: React.FC = () => {
                     boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.85)',
                   }}
                 >
-                  {/* Top Bar: Logo on left, (X) Close button on right */}
-                  <div className="flex items-center justify-between">
-                    <div className="w-12 h-12 rounded-[12px] bg-white/[0.08] p-1.5 flex items-center justify-center shrink-0 border border-white/10 shadow-sm">
-                      <img
-                        src={selectedMobileExp.image}
-                        alt={selectedMobileExp.company}
-                        className="w-full h-full object-contain rounded-[8px]"
-                      />
-                    </div>
+                  {/* Floating Close Button ABOVE the card outside it */}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMobileExp(null)}
+                    aria-label="Close"
+                    className="absolute -top-12 right-0 w-9 h-9 rounded-full bg-[#18191c]/90 hover:bg-white/20 active:scale-95 text-white/80 hover:text-white flex items-center justify-center transition-all cursor-pointer border border-white/15 backdrop-blur-md shadow-lg"
+                  >
+                    <X size={16} strokeWidth={2.5} />
+                  </button>
 
-                    <button
-                      type="button"
-                      onClick={() => setSelectedMobileExp(null)}
-                      aria-label="Close"
-                      className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 text-white/80 hover:text-white flex items-center justify-center transition-all cursor-pointer border border-white/10"
-                    >
-                      <X size={16} strokeWidth={2.5} />
-                    </button>
+                  {/* Logo */}
+                  <div className="w-12 h-12 rounded-[12px] bg-white/[0.08] p-1.5 flex items-center justify-center shrink-0 border border-white/10 shadow-sm">
+                    <img
+                      src={selectedMobileExp.image}
+                      alt={selectedMobileExp.company}
+                      className="w-full h-full object-contain rounded-[8px]"
+                    />
                   </div>
 
                   {/* Role Title & Metadata */}
@@ -298,7 +297,7 @@ export const ExperienceFolder: React.FC = () => {
                   </p>
 
                   {/* Switcher tabs between experiences */}
-                  <div className="flex items-center gap-2 pt-2 border-t border-white/[0.08] mt-1">
+                  <div className="flex items-center gap-2 pt-4 sm:pt-5 border-t border-white/[0.08] mt-3 sm:mt-4">
                     <span className="text-[11px] uppercase tracking-wider text-white/40 font-semibold mr-1">
                       View:
                     </span>

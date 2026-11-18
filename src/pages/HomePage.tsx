@@ -92,6 +92,9 @@ export function HomePage() {
     };
   }, [hasSeenIntro]);
 
+  const isManualScrollingRef = useRef(false);
+  const manualScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Scroll section tracking & sticky mobile header scroll detection
   useEffect(() => {
     const content = contentRef.current;
@@ -99,13 +102,23 @@ export function HomePage() {
     const updateActive = () => {
       setIsScrolled(content.scrollTop > 20);
 
+      if (isManualScrollingRef.current) return;
+
       const sections = Array.from(content.querySelectorAll('section[id]')) as HTMLElement[];
       if (sections.length === 0) return;
-      const triggerY = content.scrollTop + content.clientHeight * 0.3;
+
+      // Header height threshold: section is active once it reaches near top nav (~110px)
+      const headerThreshold = 110;
       let active = sections[0].id;
+
       for (const s of sections) {
-        if (s.offsetTop <= triggerY) active = s.id;
+        const rect = s.getBoundingClientRect();
+        if (rect.top <= headerThreshold) {
+          active = s.id;
+        }
       }
+
+      if (active === 'ai') active = 'about';
       setActiveSection(active);
     };
     updateActive();
@@ -114,10 +127,23 @@ export function HomePage() {
   }, []);
 
   const scrollToSection = (sectionId: string) => {
+    const targetId = sectionId === 'home' ? 'work' : sectionId;
+    setActiveSection(targetId);
+
+    // Suppress scroll-listener overrides while Lenis is animating the scroll
+    if (manualScrollTimerRef.current) clearTimeout(manualScrollTimerRef.current);
+    isManualScrollingRef.current = true;
+    manualScrollTimerRef.current = setTimeout(() => {
+      isManualScrollingRef.current = false;
+    }, 900);
+
+    if (sectionId === 'work' || sectionId === 'home') {
+      contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
     const el = contentRef.current?.querySelector(`#${sectionId}`);
     if (el) {
       scrollTo(el as HTMLElement);
-      setActiveSection(sectionId);
     }
   };
 
